@@ -8,12 +8,12 @@ import jakarta.persistence.Table
 import org.fanteract.entity.constant.BaseEntity
 
 @Entity
-@Table(name = "chats")
-class Chat (
+@Table(name = "boards")
+class Board (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val chatId: Long,
+    val boardId: Long,
+    val title: String,
     val content: String,
-    val chatroomId: Long,
     val userId: Long,
 ): BaseEntity()
