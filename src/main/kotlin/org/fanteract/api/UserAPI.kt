@@ -1,7 +1,11 @@
 package org.fanteract.api
 
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.security.Keys
+import org.fanteract.annotation.LoginRequired
 import org.fanteract.dto.*
 import org.fanteract.service.UserService
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/users")
 class UserAPI(
     private val userService: UserService,
+    @Value("\${jwt.secret}") private val jwtSecret: String,
 ) {
     @PostMapping("/sign-in")
     fun signIn(
@@ -23,12 +28,20 @@ class UserAPI(
         return ResponseEntity.ok().build()
     }
 
+
     @PostMapping("/sign-up")
     fun signUpWithCredential(
         @RequestBody userSignUpRequestDto: UserSignUpRequestDto,
-    ): ResponseEntity<Void> {
-        userService.signUp(userSignUpRequestDto)
+    ): ResponseEntity<UserSignUpResponseDto> {
+        val response = userService.signUp(userSignUpRequestDto)
 
+
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/hello")
+    @LoginRequired
+    fun hello(): ResponseEntity<Void>{
         return ResponseEntity.ok().build()
     }
 }
