@@ -38,10 +38,4 @@ class UserAPI(
 
         return ResponseEntity.ok(response)
     }
-
-    @GetMapping("/hello")
-    @LoginRequired
-    fun hello(): ResponseEntity<Void>{
-        return ResponseEntity.ok().build()
-    }
 }
