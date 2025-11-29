@@ -14,10 +14,10 @@ import java.time.LocalDateTime
 class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val userId: Long,
+    val userId: Long = 0L,
     @Column(unique = true) val email: String,
     val password: String,
-    val balance: Int,
-    val activePoint: Int,
-    val passExpiredAt: LocalDateTime,
+    val balance: Int = 0,
+    val activePoint: Int = 0,
+    val passExpiredAt: LocalDateTime? = null,
 ): BaseEntity()
