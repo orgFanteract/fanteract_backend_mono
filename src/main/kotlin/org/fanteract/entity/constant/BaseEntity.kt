@@ -1,6 +1,8 @@
 package org.fanteract.entity.constant
 
 import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.MappedSuperclass
 import org.fanteract.enumerate.Status
 import org.springframework.data.annotation.CreatedDate
@@ -15,5 +17,6 @@ abstract class BaseEntity(
     var createdAt: LocalDateTime? = null,
     @LastModifiedDate
     var updatedAt: LocalDateTime? = null,
+    @Enumerated(EnumType.STRING)
     var status: Status = Status.ACTIVATED,
 )
