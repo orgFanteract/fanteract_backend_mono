@@ -12,8 +12,8 @@ import org.fanteract.entity.constant.BaseEntity
 class Chatroom (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val chatroomId: Long,
+    val chatroomId: Long = 0L,
     val title: String,
-    val description: String,
+    val description: String?,
     val userId: Long,
 ): BaseEntity()
