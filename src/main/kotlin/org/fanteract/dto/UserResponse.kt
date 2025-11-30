@@ -1,5 +1,5 @@
 package org.fanteract.dto
 
-data class UserSignUpResponseDto(
+data class UserSignInResponseDto(
     val token: String,
 )
