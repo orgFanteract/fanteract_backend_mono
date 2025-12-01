@@ -32,4 +32,8 @@ class ChatroomReader(
         }
     }
 
+    fun findByUserIdAndTitleContaining(userId: Long, title: String): List<Chatroom> {
+        return chatroomRepo.findByUserIdAndTitleContaining(userId, title)
+    }
+
 }
