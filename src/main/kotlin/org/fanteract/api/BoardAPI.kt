@@ -6,6 +6,7 @@ import org.fanteract.config.JwtParser
 import org.fanteract.dto.*
 import org.fanteract.service.BoardService
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -72,6 +73,7 @@ class BoardAPI(
         return ResponseEntity.ok().body(response)
     }
 
+    // 게시글 수정
     @LoginRequired
     @PutMapping("/{boardId}")
     fun updateBoard(
@@ -85,5 +87,29 @@ class BoardAPI(
         return ResponseEntity.ok().build()
     }
 
+    // 게시글 좋아요 선택
+    @LoginRequired
+    @PostMapping("/{boardId}/heart")
+    fun createHeartInBoard(
+        request: HttpServletRequest,
+        @PathVariable boardId: Long,
+    ): ResponseEntity<CreateHeartInBoardResponse>{
+        val userId = JwtParser.extractKey(request, "userId")
+        val response = boardService.createHeartInBoard(boardId, userId)
 
+        return ResponseEntity.ok().body(response)
+    }
+
+    // 게시글 좋아요 취소
+    @LoginRequired
+    @DeleteMapping("/{boardId}/heart")
+    fun deleteHeartInBoard(
+        request: HttpServletRequest,
+        @PathVariable boardId: Long,
+    ): ResponseEntity<Void>{
+        val userId = JwtParser.extractKey(request, "userId")
+        boardService.deleteHeartInBoard(boardId, userId)
+
+        return ResponseEntity.ok().build()
+    }
 }
