@@ -32,4 +32,8 @@ class CommentReader(
 
         return comment
     }
+
+    fun existsById(commentId: Long): Boolean {
+        return commentRepo.existsById(commentId)
+    }
 }

@@ -17,7 +17,7 @@ data class ReadBoardListResponse(
 
 data class ReadBoardResponse(
     val boardId: Long,
-    val userId: Long,
+    val userName: String,
     val title: String,
     val commentCount: Int,
     val heartCount: Int,
@@ -27,7 +27,7 @@ data class ReadBoardResponse(
 
 data class ReadBoardDetailResponse(
     val boardId: Long,
-    val userId: Long,
+    val userName: String,
     val title: String,
     val content: String,
     val commentCount: Int,

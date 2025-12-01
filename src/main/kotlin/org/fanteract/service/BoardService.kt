@@ -6,6 +6,7 @@ import org.fanteract.domain.BoardReader
 import org.fanteract.domain.BoardWriter
 import org.fanteract.domain.CommentReader
 import org.fanteract.domain.CommentWriter
+import org.fanteract.domain.UserReader
 import org.fanteract.dto.CreateBoardRequest
 import org.fanteract.dto.CreateBoardResponse
 import org.fanteract.dto.CreateHeartInBoardResponse
@@ -25,6 +26,7 @@ class BoardService(
     private val commentReader: CommentReader,
     private val boardHeartReader: BoardHeartReader,
     private val boardHeartWriter: BoardHeartWriter,
+    private val userReader: UserReader,
 ) {
     fun createBoard(
         createBoardRequest: CreateBoardRequest,
@@ -60,16 +62,20 @@ class BoardService(
                 .findByBoardIdIn(boardContent.map{it.boardId})
                 .groupBy {it.boardId }
 
+        val userMap =
+            userReader.findByIdIn(boardContent.map{it.userId}).associateBy { it.userId }
+
 
         val payload =
             boardContent.map{ board ->
                 val comment = commentGroup[board.boardId]
                 val heart = heartGroup[board.boardId]
+                val user = userMap[board.userId]
 
                 ReadBoardResponse(
                     boardId = board.boardId,
                     title = board.title,
-                    userId = board.userId,
+                    userName = user?.name ?: "-",
                     commentCount = comment?.count() ?: 0,
                     heartCount = heart?.count() ?: 0,
                     createdAt = board.createdAt!!,
@@ -111,15 +117,19 @@ class BoardService(
                 .findByBoardIdIn(boardContent.map{it.boardId})
                 .groupBy {it.boardId }
 
+        val userMap =
+            userReader.findByIdIn(boardContent.map{it.userId}).associateBy { it.userId }
+
         val payload =
             boardContent.map{ board ->
                 val comment = commentGroup[board.boardId]
                 val heart = heartGroup[board.boardId]
+                val user = userMap[board.userId]
 
                 ReadBoardResponse(
                     boardId = board.boardId,
                     title = board.title,
-                    userId = board.userId,
+                    userName = user?.name ?: "-",
                     commentCount = comment?.count() ?: 0,
                     heartCount = heart?.count() ?: 0,
                     createdAt = board.createdAt!!,
@@ -145,12 +155,13 @@ class BoardService(
 
         val commentList = commentReader.findByBoardIdIn(listOf(board.boardId))
         val heartList = boardHeartReader.findByBoardIdIn(listOf(board.boardId))
+        val user = userReader.findById(board.userId)
 
         return ReadBoardDetailResponse(
             boardId = board.boardId,
             title = board.title,
             content = board.content,
-            userId = board.userId,
+            userName = user.name,
             commentCount = commentList.count(),
             heartCount = heartList.count(),
             createdAt = board.createdAt!!,
@@ -182,6 +193,10 @@ class BoardService(
             throw NoSuchElementException("조건에 맞는 게시글 좋아요 내용이 이미 존재합니다")
         }
 
+        if (!boardReader.existsById(boardId)){
+            throw NoSuchElementException("조건에 맞는 게시글이 존재하지 않습니다")
+        }
+
         val response =
             boardHeartWriter.create(
                 userId = userId,
@@ -192,6 +207,10 @@ class BoardService(
     }
 
     fun deleteHeartInBoard(boardId: Long, userId: Long) {
+        if (!boardReader.existsById(boardId)){
+            throw NoSuchElementException("조건에 맞는 게시글이 존재하지 않습니다")
+        }
+
         boardHeartWriter.delete(
             userId = userId,
             boardId = boardId,

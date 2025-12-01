@@ -1,7 +1,10 @@
 package org.fanteract.service
 
+import org.fanteract.domain.CommentHeartReader
+import org.fanteract.domain.CommentHeartWriter
 import org.fanteract.domain.CommentReader
 import org.fanteract.domain.CommentWriter
+import org.fanteract.domain.UserReader
 import org.fanteract.dto.*
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -13,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional
 class CommentService(
     private val commentReader: CommentReader,
     private val commentWriter: CommentWriter,
+    private val commentHeartReader: CommentHeartReader,
+    private val commentHeartWriter: CommentHeartWriter,
+    private val userReader: UserReader,
 ) {
     fun readCommentsByBoardId(
         boardId: Long,
@@ -28,12 +34,19 @@ class CommentService(
         val commentPage = commentReader.findByBoardId(boardId, pageable)
         val commentContent = commentPage.content
 
+        val heartGroup = commentHeartReader.findByCommentIdIn(commentContent.map{it.commentId}).groupBy { it.commentId }
+        val userMap = userReader.findByIdIn(commentContent.map{it.userId}).associateBy {it.userId }
+
         val payload =
             commentContent.map { comment ->
+                val heart = heartGroup[comment.commentId]
+                val user = userMap[comment.userId]!!
+
                 ReadCommentResponse(
                     commentId = comment.commentId,
                     content = comment.content,
-                    userId = comment.userId,
+                    heartCount = heart?.count()?: 0,
+                    userName = user.email,
                     createdAt = comment.createdAt!!,
                     updatedAt = comment.updatedAt!!,
                 )
@@ -63,12 +76,19 @@ class CommentService(
         val commentPage = commentReader.findByUserId(userId, pageable)
         val commentContent = commentPage.content
 
+        val heartGroup = commentHeartReader.findByCommentIdIn(commentContent.map{it.commentId}).groupBy { it.commentId }
+        val userMap = userReader.findByIdIn(commentContent.map{it.userId}).associateBy {it.userId }
+
         val payload =
             commentContent.map { comment ->
+                val heart = heartGroup[comment.commentId]
+                val user = userMap[comment.userId]!!
+
                 ReadCommentResponse(
                     commentId = comment.commentId,
                     content = comment.content,
-                    userId = comment.userId,
+                    heartCount = heart?.count()?: 0,
+                    userName = user.email,
                     createdAt = comment.createdAt!!,
                     updatedAt = comment.updatedAt!!,
                 )
@@ -114,5 +134,34 @@ class CommentService(
         }
 
         commentWriter.delete(commentId = commentId)
+    }
+
+    fun createHeartInComment(commentId: Long, userId: Long): CreateHeartInCommentResponse {
+        if (commentHeartReader.existsByUserIdAndCommentId(userId, commentId)) {
+            throw NoSuchElementException("조건에 맞는 코멘트 좋아요 내용이 이미 존재합니다")
+        }
+
+        if (!commentReader.existsById(commentId)){
+            throw NoSuchElementException("조건에 맞는 코멘트가 존재하지 않습니다")
+        }
+
+        val response =
+            commentHeartWriter.create(
+                userId = userId,
+                commentId = commentId,
+            )
+
+        return CreateHeartInCommentResponse(response.commentHeartId)
+    }
+
+    fun deleteHeartInComment(commentId: Long, userId: Long) {
+        if (!commentReader.existsById(commentId)){
+            throw NoSuchElementException("조건에 맞는 코멘트가 존재하지 않습니다")
+        }
+
+        commentHeartWriter.delete(
+            userId = userId,
+            commentId = commentId,
+        )
     }
 }
