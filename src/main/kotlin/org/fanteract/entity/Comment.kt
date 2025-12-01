@@ -12,8 +12,8 @@ import org.fanteract.entity.constant.BaseEntity
 class Comment (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val commentId: Long,
-    val content: String,
+    val commentId: Long = 0L,
+    var content: String,
     val boardId: Long,
     val userId: Long,
 ): BaseEntity()
