@@ -10,3 +10,8 @@ enum class AlarmStatus {
     DELETED,
     UPDATED,
 }
+
+enum class ChatroomJoinStatus{
+    JOIN,
+    LEAVE,
+}

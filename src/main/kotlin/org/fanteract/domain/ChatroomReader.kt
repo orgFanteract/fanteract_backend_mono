@@ -25,4 +25,11 @@ class ChatroomReader(
 
         return chatroom
     }
+
+    fun existsById(chatroomId: Long){
+        if (!chatroomRepo.existsById(chatroomId)){
+            throw NoSuchElementException("조건에 맞는 채팅방이 존재하지 않습니다")
+        }
+    }
+
 }

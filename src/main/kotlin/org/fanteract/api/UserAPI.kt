@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/users")
 class UserAPI(
     private val userService: UserService,
-    @Value("\${jwt.secret}") private val jwtSecret: String,
 ) {
     @PostMapping("/sign-in")
     fun signIn(
