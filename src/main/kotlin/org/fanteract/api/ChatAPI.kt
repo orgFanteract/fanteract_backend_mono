@@ -3,18 +3,20 @@ package org.fanteract.api
 import jakarta.servlet.http.HttpServletRequest
 import org.fanteract.annotation.LoginRequired
 import org.fanteract.config.JwtParser
-import org.fanteract.dto.CreateChatroomRequest
-import org.fanteract.dto.CreateChatroomResponse
-import org.fanteract.dto.ReadChatroomListResponse
-import org.fanteract.dto.ReadChatroomResponse
+import org.fanteract.dto.*
 import org.fanteract.service.ChatService
 import org.springframework.http.ResponseEntity
+import org.springframework.messaging.handler.annotation.DestinationVariable
+import org.springframework.messaging.handler.annotation.MessageMapping
+import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.security.Principal
 
 @RestController
 @RequestMapping("/chats")
@@ -46,16 +48,100 @@ class ChatAPI(
         return ResponseEntity.ok().body(response)
     }
 
+    // 채팅방 채팅내역 조회
+    @LoginRequired
+    @GetMapping("{chatroomId}/chat")
+    fun readChatByChatroomId(
+        request: HttpServletRequest,
+        @PathVariable chatroomId: Long,
+        @RequestParam("page", defaultValue = "0") page: Int,
+        @RequestParam("size", defaultValue = "10") size: Int,
+    ): ResponseEntity<ReadChatListResponse> {
+        val userId = JwtParser.extractKey(request, "userId")
+
+        val response = chatService.readChatByChatroomId(
+            userId = userId,
+            chatroomId = chatroomId,
+            page = page,
+            size = size
+        )
+
+        return ResponseEntity.ok().body(response)
+    }
+
+    // 채팅방 채팅내역 조회
+    @LoginRequired
+    @PostMapping("{chatroomId}/chat")
+    fun readChatContainingByChatroomId(
+        request: HttpServletRequest,
+        @PathVariable chatroomId: Long,
+        @RequestParam("page", defaultValue = "0") page: Int,
+        @RequestBody readChatContainingRequest: ReadChatContainingRequest
+    ): ResponseEntity<ReadChatContainingListResponse> {
+        val userId = JwtParser.extractKey(request, "userId")
+
+        val response =
+            chatService.readChatContainingByChatroomId(
+                userId = userId,
+                chatroomId = chatroomId,
+                readChatContainingRequest = readChatContainingRequest,
+                page = page,
+                size = 1 // 한 개씩 찾기 위해 1로 고정
+            )
+
+        return ResponseEntity.ok().body(response)
+    }
+
     // 특정 채팅방 조회
     @LoginRequired
-    @GetMapping("{chatroomId}/chatroom")
-    fun readChatroomById(
+    @GetMapping("{chatroomId}/chatroom/summary")
+    fun readChatroomSummaryById(
         request: HttpServletRequest,
         @PathVariable chatroomId: Long,
     ): ResponseEntity<ReadChatroomResponse>{
         val userId = JwtParser.extractKey(request, "userId")
-        val response = chatService.readChatroomById(userId, chatroomId)
+        val response = chatService.readChatroomSummaryById(userId, chatroomId)
 
         return ResponseEntity.ok().body(response)
+    }
+
+    // 특정 채팅방 접속
+    @LoginRequired
+    @PostMapping("/{chatroomId}/join")
+    fun joinChatroom(
+        request: HttpServletRequest,
+        @PathVariable chatroomId: Long,
+    ): ResponseEntity<JoinChatroomResponse>{
+        val userId = JwtParser.extractKey(request, "userId")
+        val response = chatService.joinChatroom(userId, chatroomId)
+
+        return ResponseEntity.ok().body(response)
+    }
+
+    // 특정 채팅방 탈퇴
+    @LoginRequired
+    @PostMapping("/{chatroomId}/leave")
+    fun leaveChatroom(
+        request: HttpServletRequest,
+        @PathVariable chatroomId: Long,
+    ): ResponseEntity<LeaveChatroomResponseDto>{
+        val userId = JwtParser.extractKey(request, "userId")
+        val response = chatService.leaveChatroom(userId, chatroomId)
+
+        return ResponseEntity.ok().body(response)
+    }
+
+    // 특정 채팅방에 채팅 전송
+    @MessageMapping("/chat.{chatroomId}") // 다음 url path를 통해 발동
+    @SendTo("/subscribe/chat.{chatroomId}") // 해당 결과는 다음 path를 구독하는 클라이언트에게 전달
+    fun sendChat(
+        principal: Principal,
+        sendChatRequestDto: SendChatRequestDto,
+        @DestinationVariable chatroomId: Long
+    ): SendChatResponseDto{
+        val userId = principal.name.toLong()
+        val response = chatService.sendChat(sendChatRequestDto, chatroomId, userId)
+
+        return response
     }
 }

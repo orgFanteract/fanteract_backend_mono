@@ -1,19 +1,23 @@
 package org.fanteract.entity
 
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import org.fanteract.entity.constant.BaseEntity
+import org.fanteract.enumerate.ChatroomJoinStatus
 
 @Entity
-@Table(name = "chats")
-class Chat (
+@Table(name = "user_chatroom_histories")
+class UserChatroomHistory (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val chatId: Long = 0L,
-    val content: String,
-    val chatroomId: Long,
+    val userChatroomId: Long = 0L,
     val userId: Long,
+    val chatroomId: Long,
+    @Enumerated(EnumType.STRING)
+    val chatroomJoinStatus: ChatroomJoinStatus,
 ): BaseEntity()

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class AuthInterceptor(
-    @Value("\${jwt.secret}") private val jwtSecret: String,
+    @Value($$"${jwt.secret}") private val jwtSecret: String,
 ) : HandlerInterceptor {
     override fun preHandle(
         request: HttpServletRequest,
