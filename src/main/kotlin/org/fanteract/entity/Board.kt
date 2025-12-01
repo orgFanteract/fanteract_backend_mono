@@ -12,8 +12,8 @@ import org.fanteract.entity.constant.BaseEntity
 class Board (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val boardId: Long,
-    val title: String,
-    val content: String,
+    val boardId: Long = 0L,
+    var title: String,
+    var content: String,
     val userId: Long,
 ): BaseEntity()
