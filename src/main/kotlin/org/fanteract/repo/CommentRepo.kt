@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface CommentRepo: JpaRepository<Comment, Long>
+interface CommentRepo: JpaRepository<Comment, Long> {
+    fun findByBoardIdIn(idList: List<Long>): List<Comment>
+}

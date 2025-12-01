@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface BoardHeartRepo: JpaRepository<BoardHeart, Long> {
+    fun findByBoardIdIn(idList: List<Long>): List<BoardHeart>
 }
