@@ -8,3 +8,7 @@ data class CreateChatroomRequest(
 data class SendChatRequestDto(
     val content: String,
 )
+
+data class ReadChatContainingRequest(
+    val content: String,
+)

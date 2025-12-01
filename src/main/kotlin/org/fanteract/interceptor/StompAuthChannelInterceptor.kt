@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class StompAuthChannelInterceptor(
-    @Value("\${jwt.secret}") private val jwtSecret: String,
+    @Value($$"${jwt.secret}") private val jwtSecret: String,
 ) : ChannelInterceptor {
     private val sessionPrincipalMap = ConcurrentHashMap<String, Principal>()
 
@@ -30,10 +30,10 @@ class StompAuthChannelInterceptor(
         when (command) {
             StompCommand.CONNECT -> {
                 val authHeader = accessor.getFirstNativeHeader("Authorization")
-                    ?: throw IllegalArgumentException("No Authorization header in STOMP CONNECT")
+                    ?: throw IllegalArgumentException("잘못된 토큰입니다.")
 
                 if (!authHeader.startsWith("Bearer ")) {
-                    throw IllegalArgumentException("Invalid Authorization header in STOMP CONNECT")
+                    throw IllegalArgumentException("잘못된 토큰입니다.")
                 }
 
                 val token = authHeader.removePrefix("Bearer ").trim()
@@ -42,13 +42,10 @@ class StompAuthChannelInterceptor(
                 val subject = Jwts.parser().verifyWith(secretKey).build()
                     .parseSignedClaims(token).payload.subject
 
-                println("CONNECT subject : $subject, sessionId=$sessionId")
-
                 val principal = Principal { subject }
 
-                // 1) 이 메시지에 user 세팅
                 accessor.user = principal
-                // 2) 세션에 매핑 저장
+
                 if (sessionId != null) {
                     sessionPrincipalMap[sessionId] = principal
                 }
@@ -57,7 +54,6 @@ class StompAuthChannelInterceptor(
             StompCommand.DISCONNECT -> {
                 if (sessionId != null) {
                     sessionPrincipalMap.remove(sessionId)
-                    println("DISCONNECT sessionId=$sessionId -> principal removed")
                 }
             }
 
@@ -67,9 +63,6 @@ class StompAuthChannelInterceptor(
                     val principal = sessionPrincipalMap[sessionId]
                     if (principal != null) {
                         accessor.user = principal
-                        println("RESTORE principal for command=$command, sessionId=$sessionId, user=${principal.name}")
-                    } else {
-                        println("NO principal stored for command=$command, sessionId=$sessionId")
                     }
                 }
             }

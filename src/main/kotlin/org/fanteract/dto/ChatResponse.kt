@@ -16,7 +16,39 @@ data class ReadChatroomResponse(
     val description: String?,
 )
 
-data class JoinChatroomResponseDto(
+data class ReadChatResponse(
+    val chatId: Long,
+    val userId: Long,
+    val content: String,
+    val createdAt: LocalDateTime,
+)
+
+data class ReadChatListResponse(
+    val contents: List<ReadChatResponse>,
+    val page: Int,
+    val size: Int,
+    val totalElements: Long,
+    val totalPages: Int,
+    val hasNext: Boolean,
+)
+
+data class ReadChatContainingResponse(
+    val chatId: Long,
+    val userId: Long,
+    val content: String,
+    val createdAt: LocalDateTime,
+)
+
+data class ReadChatContainingListResponse(
+    val contents: List<ReadChatContainingResponse>,
+    val page: Int,
+    val size: Int,
+    val totalElements: Long,
+    val totalPages: Int,
+    val hasNext: Boolean,
+)
+
+data class JoinChatroomResponse(
     val userChatroomId: Long,
 )
 

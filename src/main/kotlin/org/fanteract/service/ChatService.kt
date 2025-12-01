@@ -1,5 +1,6 @@
 package org.fanteract.service
 
+import org.fanteract.domain.ChatReader
 import org.fanteract.domain.ChatWriter
 import org.fanteract.domain.ChatroomReader
 import org.fanteract.domain.ChatroomWriter
@@ -8,14 +9,21 @@ import org.fanteract.domain.UserChatroomReader
 import org.fanteract.domain.UserChatroomWriter
 import org.fanteract.dto.CreateChatroomRequest
 import org.fanteract.dto.CreateChatroomResponse
-import org.fanteract.dto.JoinChatroomResponseDto
+import org.fanteract.dto.JoinChatroomResponse
 import org.fanteract.dto.LeaveChatroomResponseDto
+import org.fanteract.dto.ReadChatContainingListResponse
+import org.fanteract.dto.ReadChatContainingRequest
+import org.fanteract.dto.ReadChatContainingResponse
+import org.fanteract.dto.ReadChatListResponse
+import org.fanteract.dto.ReadChatResponse
 import org.fanteract.dto.ReadChatroomListResponse
 import org.fanteract.dto.ReadChatroomResponse
 import org.fanteract.dto.SendChatRequestDto
 import org.fanteract.dto.SendChatResponseDto
 import org.fanteract.entity.UserChatroom
 import org.fanteract.enumerate.ChatroomJoinStatus
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.Long
@@ -29,6 +37,7 @@ class ChatService(
     private val userChatroomWriter: UserChatroomWriter,
     private val userChatroomHistoryWriter: UserChatroomHistoryWriter,
     private val chatWriter: ChatWriter,
+    private val chatReader: ChatReader,
 ) {
     fun createChatroom(
         userId: Long,
@@ -63,7 +72,20 @@ class ChatService(
             }
         )
     }
-    fun readChatroomById(
+    fun readChatroomSummaryById(
+        userId: Long,
+        chatroomId: Long,
+    ): ReadChatroomResponse {
+        val chatroom = chatroomReader.findByChatroomIdAndUserId(chatroomId, userId)
+
+        return ReadChatroomResponse(
+            chatroomId = chatroom.chatroomId,
+            title = chatroom.title,
+            description = chatroom.description,
+        )
+    }
+
+    fun readChatroomDetailById(
         userId: Long,
         chatroomId: Long,
     ): ReadChatroomResponse {
@@ -79,7 +101,7 @@ class ChatService(
     fun joinChatroom(
         userId: Long,
         chatroomId: Long
-    ): JoinChatroomResponseDto {
+    ): JoinChatroomResponse {
         // 채팅방 존재여부 확인
         chatroomReader.existsById(chatroomId)
 
@@ -99,7 +121,7 @@ class ChatService(
                 chatroomId = chatroomId,
             )
 
-        return JoinChatroomResponseDto(userChatroom.userChatroomId)
+        return JoinChatroomResponse(userChatroom.userChatroomId)
     }
     fun leaveChatroom(
         userId: Long,
@@ -197,5 +219,82 @@ class ChatService(
         )
 
         return userChatroom
+    }
+
+    @Transactional(readOnly = true)
+    fun readChatByChatroomId(
+        userId: Long,
+        chatroomId: Long,
+        page: Int,
+        size: Int
+    ): ReadChatListResponse {
+        val pageable = PageRequest.of(
+            page,
+            size,
+            Sort.by(Sort.Direction.DESC, "createdAt")
+        )
+
+        val chatPage = chatReader.findByUserIdAndChatroomId(
+            userId = userId,
+            chatroomId = chatroomId,
+            pageable = pageable
+        )
+
+        val contents = chatPage.content.map { chat ->
+            ReadChatResponse(
+                chatId = chat.chatId,
+                userId = chat.userId,
+                content = chat.content,
+                createdAt = chat.createdAt!!
+            )
+        }
+
+        return ReadChatListResponse(
+            contents = contents,
+            page = chatPage.number,
+            size = chatPage.size,
+            totalElements = chatPage.totalElements,
+            totalPages = chatPage.totalPages,
+            hasNext = chatPage.hasNext()
+        )
+    }
+
+    fun readChatContainingByChatroomId(
+        userId: Long,
+        chatroomId: Long,
+        readChatContainingRequest: ReadChatContainingRequest,
+        page: Int,
+        size: Int
+    ): ReadChatContainingListResponse {
+        val pageable = PageRequest.of(
+            page,
+            size,
+            Sort.by(Sort.Direction.DESC, "createdAt")
+        )
+
+        val chatPage = chatReader.findByUserIdAndChatroomIdAnd(
+            userId = userId,
+            chatroomId = chatroomId,
+            content = readChatContainingRequest.content,
+            pageable = pageable
+        )
+
+        val contents = chatPage.content.map { chat ->
+            ReadChatContainingResponse(
+                chatId = chat.chatId,
+                userId = chat.userId,
+                content = chat.content,
+                createdAt = chat.createdAt!!
+            )
+        }
+
+        return ReadChatContainingListResponse(
+            contents = contents,
+            page = chatPage.number,
+            size = chatPage.size,
+            totalElements = chatPage.totalElements,
+            totalPages = chatPage.totalPages,
+            hasNext = chatPage.hasNext()
+        )
     }
 }

@@ -7,15 +7,14 @@ import org.fanteract.dto.*
 import org.fanteract.service.ChatService
 import org.springframework.http.ResponseEntity
 import org.springframework.messaging.handler.annotation.DestinationVariable
-import org.springframework.messaging.handler.annotation.Header
 import org.springframework.messaging.handler.annotation.MessageMapping
-import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.security.Principal
 
@@ -49,15 +48,59 @@ class ChatAPI(
         return ResponseEntity.ok().body(response)
     }
 
+    // 채팅방 채팅내역 조회
+    @LoginRequired
+    @GetMapping("{chatroomId}/chat")
+    fun readChatByChatroomId(
+        request: HttpServletRequest,
+        @PathVariable chatroomId: Long,
+        @RequestParam("page", defaultValue = "0") page: Int,
+        @RequestParam("size", defaultValue = "10") size: Int,
+    ): ResponseEntity<ReadChatListResponse> {
+        val userId = JwtParser.extractKey(request, "userId")
+
+        val response = chatService.readChatByChatroomId(
+            userId = userId,
+            chatroomId = chatroomId,
+            page = page,
+            size = size
+        )
+
+        return ResponseEntity.ok().body(response)
+    }
+
+    // 채팅방 채팅내역 조회
+    @LoginRequired
+    @PostMapping("{chatroomId}/chat")
+    fun readChatContainingByChatroomId(
+        request: HttpServletRequest,
+        @PathVariable chatroomId: Long,
+        @RequestParam("page", defaultValue = "0") page: Int,
+        @RequestBody readChatContainingRequest: ReadChatContainingRequest
+    ): ResponseEntity<ReadChatContainingListResponse> {
+        val userId = JwtParser.extractKey(request, "userId")
+
+        val response =
+            chatService.readChatContainingByChatroomId(
+                userId = userId,
+                chatroomId = chatroomId,
+                readChatContainingRequest = readChatContainingRequest,
+                page = page,
+                size = 1 // 한 개씩 찾기 위해 1로 고정
+            )
+
+        return ResponseEntity.ok().body(response)
+    }
+
     // 특정 채팅방 조회
     @LoginRequired
-    @GetMapping("{chatroomId}/chatroom")
-    fun readChatroomById(
+    @GetMapping("{chatroomId}/chatroom/summary")
+    fun readChatroomSummaryById(
         request: HttpServletRequest,
         @PathVariable chatroomId: Long,
     ): ResponseEntity<ReadChatroomResponse>{
         val userId = JwtParser.extractKey(request, "userId")
-        val response = chatService.readChatroomById(userId, chatroomId)
+        val response = chatService.readChatroomSummaryById(userId, chatroomId)
 
         return ResponseEntity.ok().body(response)
     }
@@ -68,7 +111,7 @@ class ChatAPI(
     fun joinChatroom(
         request: HttpServletRequest,
         @PathVariable chatroomId: Long,
-    ): ResponseEntity<JoinChatroomResponseDto>{
+    ): ResponseEntity<JoinChatroomResponse>{
         val userId = JwtParser.extractKey(request, "userId")
         val response = chatService.joinChatroom(userId, chatroomId)
 
@@ -96,11 +139,7 @@ class ChatAPI(
         sendChatRequestDto: SendChatRequestDto,
         @DestinationVariable chatroomId: Long
     ): SendChatResponseDto{
-//        if (principal == null){
-//            throw NoSuchElementException("조건에 맞는 토큰이 존재하지 않습니다")
-//        }
         val userId = principal.name.toLong()
-        println("userId: $userId chatroomId: $chatroomId content:${sendChatRequestDto.content}")
         val response = chatService.sendChat(sendChatRequestDto, chatroomId, userId)
 
         return response
