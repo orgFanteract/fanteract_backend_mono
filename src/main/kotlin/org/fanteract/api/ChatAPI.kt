@@ -38,12 +38,25 @@ class ChatAPI(
 
     // 유저 기반 채팅방 조회
     @LoginRequired
-    @GetMapping("/chatroom")
+    @GetMapping("/chatroom/user")
     fun readChatroomListByUserId(
         request: HttpServletRequest,
     ): ResponseEntity<ReadChatroomListResponse>{
         val userId = JwtParser.extractKey(request, "userId")
         val response = chatService.readChatroomListByUserId(userId)
+
+        return ResponseEntity.ok().body(response)
+    }
+
+    // 이름 기반 채팅방 조회
+    @LoginRequired
+    @GetMapping("/chatroom")
+    fun readChatroomListByUserIdAndTitleContaining(
+        @RequestParam("title") title: String,
+        request: HttpServletRequest,
+    ): ResponseEntity<ReadChatroomListResponse>{
+        val userId = JwtParser.extractKey(request, "userId")
+        val response = chatService.readChatroomListByUserIdAndTitleContaining(userId, title)
 
         return ResponseEntity.ok().body(response)
     }
@@ -68,6 +81,8 @@ class ChatAPI(
 
         return ResponseEntity.ok().body(response)
     }
+
+
 
     // 채팅방 채팅내역 조회
     @LoginRequired
@@ -104,6 +119,8 @@ class ChatAPI(
 
         return ResponseEntity.ok().body(response)
     }
+
+
 
     // 특정 채팅방 접속
     @LoginRequired

@@ -297,4 +297,21 @@ class ChatService(
             hasNext = chatPage.hasNext()
         )
     }
+
+    fun readChatroomListByUserIdAndTitleContaining(
+        userId: Long,
+        title: String
+    ): ReadChatroomListResponse {
+        val chatroomList = chatroomReader.findByUserIdAndTitleContaining(userId, title)
+
+        return ReadChatroomListResponse(
+            chatroomList.map{
+                ReadChatroomResponse(
+                    chatroomId = it.chatroomId,
+                    title = it.title,
+                    description = it.description,
+                )
+            }
+        )
+    }
 }

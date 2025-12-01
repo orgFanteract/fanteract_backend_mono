@@ -19,7 +19,6 @@ class AuthInterceptor(
         response: HttpServletResponse,
         handler: Any
     ): Boolean {
-
         if (handler !is HandlerMethod) return true
 
         val hasAnnotation = handler.getMethodAnnotation(LoginRequired::class.java) != null
@@ -36,6 +35,8 @@ class AuthInterceptor(
                 .parseSignedClaims(token).payload.subject
 
             request.setAttribute("userId", subject)
+
+            println("subject : $subject")
             true
 
         } catch (e: Exception) {

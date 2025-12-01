@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ChatroomRepo: JpaRepository<Chatroom, Long> {
     fun findByUserId(userId: Long): List<Chatroom>
+    fun findByUserIdAndTitleContaining(userId: Long, title: String): List<Chatroom>
 }
