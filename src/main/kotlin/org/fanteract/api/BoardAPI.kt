@@ -1,5 +1,6 @@
 package org.fanteract.api
 
+import io.swagger.v3.oas.annotations.Operation
 import jakarta.servlet.http.HttpServletRequest
 import org.fanteract.annotation.LoginRequired
 import org.fanteract.config.JwtParser
@@ -22,6 +23,7 @@ class BoardAPI(
     private val boardService: BoardService,
 ) {
     @LoginRequired
+    @Operation(summary = "게시글 생성")
     @PostMapping()
     fun createBoard(
         request: HttpServletRequest,
@@ -35,6 +37,7 @@ class BoardAPI(
 
     // 사용자 작성 게시글 조회
     @LoginRequired
+    @Operation(summary = "사용자 소유 게시글 조회")
     @GetMapping("/user")
     fun readBoardByUserId(
         request: HttpServletRequest,
@@ -49,6 +52,7 @@ class BoardAPI(
 
     // 전체 게시글 조회
     @LoginRequired
+    @Operation(summary = "전체 게시글 조회")
     @GetMapping("")
     fun readBoard(
         @RequestParam("page", defaultValue = "0") page: Int,
@@ -64,6 +68,7 @@ class BoardAPI(
 
     // 특정 게시글 상세 조회
     @LoginRequired
+    @Operation(summary = "특정 게시글 상세 조회")
     @GetMapping("/{boardId}/board")
     fun readBoardDetail(
         @PathVariable boardId: Long,
@@ -75,6 +80,7 @@ class BoardAPI(
 
     // 게시글 수정
     @LoginRequired
+    @Operation(summary = "게시글 수정")
     @PutMapping("/{boardId}")
     fun updateBoard(
         request: HttpServletRequest,
@@ -89,6 +95,7 @@ class BoardAPI(
 
     // 게시글 좋아요 선택
     @LoginRequired
+    @Operation(summary = "게시글 좋아요 생성")
     @PostMapping("/{boardId}/heart")
     fun createHeartInBoard(
         request: HttpServletRequest,
@@ -102,6 +109,7 @@ class BoardAPI(
 
     // 게시글 좋아요 취소
     @LoginRequired
+    @Operation(summary = "게시글 좋아요 해제")
     @DeleteMapping("/{boardId}/heart")
     fun deleteHeartInBoard(
         request: HttpServletRequest,

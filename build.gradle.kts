@@ -39,6 +39,9 @@ dependencies {
 
     // stomp
     implementation("org.springframework.boot:spring-boot-starter-websocket")
+
+    // swagger
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 }
 
 kotlin {
