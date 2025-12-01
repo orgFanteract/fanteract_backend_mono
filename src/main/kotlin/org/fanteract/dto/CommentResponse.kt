@@ -14,11 +14,16 @@ data class ReadCommentListResponse(
 data class ReadCommentResponse(
     val commentId: Long,
     val content: String,
-    val userId: Long,
+    val heartCount: Int,
+    val userName: String,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
 )
 
 data class CreateCommentResponse(
     val commentId: Long,
+)
+
+data class CreateHeartInCommentResponse(
+    val commentHeartId: Long,
 )

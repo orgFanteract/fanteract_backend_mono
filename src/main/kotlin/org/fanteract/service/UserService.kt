@@ -36,6 +36,7 @@ class UserService(
             userWriter.create(
                 email = userSignUpRequestDto.email,
                 password = userSignUpRequestDto.password,
+                name = userSignUpRequestDto.name,
             )
     }
 

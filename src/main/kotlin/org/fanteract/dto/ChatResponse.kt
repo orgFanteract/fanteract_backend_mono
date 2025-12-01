@@ -18,7 +18,7 @@ data class ReadChatroomResponse(
 
 data class ReadChatResponse(
     val chatId: Long,
-    val userId: Long,
+    val userName: String,
     val content: String,
     val createdAt: LocalDateTime,
 )
@@ -34,7 +34,7 @@ data class ReadChatListResponse(
 
 data class ReadChatContainingResponse(
     val chatId: Long,
-    val userId: Long,
+    val userName: String,
     val content: String,
     val createdAt: LocalDateTime,
 )
@@ -57,7 +57,7 @@ data class LeaveChatroomResponseDto(
 )
 
 data class SendChatResponseDto(
-    val userId: Long,
+    val userName: String,
     val content: String,
     val createdAt: LocalDateTime,
 )

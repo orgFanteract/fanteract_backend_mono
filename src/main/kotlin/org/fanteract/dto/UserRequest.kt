@@ -8,4 +8,5 @@ data class UserSignInRequestDto(
 data class UserSignUpRequestDto(
     val email: String,
     val password: String,
+    val name: String,
 )

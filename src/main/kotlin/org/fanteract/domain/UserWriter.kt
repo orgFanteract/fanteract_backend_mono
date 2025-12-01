@@ -12,11 +12,13 @@ class UserWriter(
 ) {
     fun create(
         email: String,
-        password: String
+        password: String,
+        name: String,
     ): User {
         return userRepo.save(
             User(
                 email = email,
+                name = name,
                 password = password,
             )
         )

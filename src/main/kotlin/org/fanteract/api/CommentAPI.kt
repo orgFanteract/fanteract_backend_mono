@@ -108,4 +108,32 @@ class CommentAPI(
         )
         return ResponseEntity.ok().build()
     }
+
+    // 게시글 좋아요 선택
+    @LoginRequired
+    @Operation(summary = "코멘트 좋아요 생성")
+    @PostMapping("/{commentId}/heart")
+    fun createHeartInComment(
+        request: HttpServletRequest,
+        @PathVariable commentId: Long,
+    ): ResponseEntity<CreateHeartInCommentResponse>{
+        val userId = JwtParser.extractKey(request, "userId")
+        val response = commentService.createHeartInComment(commentId, userId)
+
+        return ResponseEntity.ok().body(response)
+    }
+
+    // 게시글 좋아요 취소
+    @LoginRequired
+    @Operation(summary = "코멘트 좋아요 해제")
+    @DeleteMapping("/{commentId}/heart")
+    fun deleteHeartInComment(
+        request: HttpServletRequest,
+        @PathVariable commentId: Long,
+    ): ResponseEntity<Void>{
+        val userId = JwtParser.extractKey(request, "userId")
+        commentService.deleteHeartInComment(commentId, userId)
+
+        return ResponseEntity.ok().build()
+    }
 }

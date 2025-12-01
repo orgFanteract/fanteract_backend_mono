@@ -24,4 +24,8 @@ class BoardReader(
     fun readById(boardId: Long): Board {
         return boardRepo.findById(boardId).orElseThrow{NoSuchElementException("조건에 맞는 게시글이 존재하지 않습니다")}
     }
+
+    fun existsById(boardId: Long): Boolean {
+        return boardRepo.existsById(boardId)
+    }
 }

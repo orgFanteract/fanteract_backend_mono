@@ -7,6 +7,7 @@ import org.fanteract.domain.ChatroomWriter
 import org.fanteract.domain.UserChatroomHistoryWriter
 import org.fanteract.domain.UserChatroomReader
 import org.fanteract.domain.UserChatroomWriter
+import org.fanteract.domain.UserReader
 import org.fanteract.dto.CreateChatroomRequest
 import org.fanteract.dto.CreateChatroomResponse
 import org.fanteract.dto.JoinChatroomResponse
@@ -38,6 +39,7 @@ class ChatService(
     private val userChatroomHistoryWriter: UserChatroomHistoryWriter,
     private val chatWriter: ChatWriter,
     private val chatReader: ChatReader,
+    private val userReader: UserReader,
 ) {
     fun createChatroom(
         userId: Long,
@@ -160,8 +162,10 @@ class ChatService(
                 userId = userId,
             )
 
+        val user = userReader.findById(chat.userId)
+
         return SendChatResponseDto(
-            userId = userId,
+            userName = user.name,
             content = chat.content,
             createdAt = chat.createdAt!!,
         )
@@ -240,10 +244,13 @@ class ChatService(
             pageable = pageable
         )
 
+        val userMap = userReader.findByIdIn(chatPage.content.map{it.userId}).associateBy {it.userId }
+
         val contents = chatPage.content.map { chat ->
+            val user = userMap[chat.userId]
             ReadChatResponse(
                 chatId = chat.chatId,
-                userId = chat.userId,
+                userName = user?.name ?: "-",
                 content = chat.content,
                 createdAt = chat.createdAt!!
             )
@@ -279,10 +286,13 @@ class ChatService(
             pageable = pageable
         )
 
+        val userMap = userReader.findByIdIn(chatPage.content.map{it.userId}).associateBy {it.userId }
+
         val contents = chatPage.content.map { chat ->
+            val user = userMap[chat.userId]
             ReadChatContainingResponse(
                 chatId = chat.chatId,
-                userId = chat.userId,
+                userName = user?.name ?: "-",
                 content = chat.content,
                 createdAt = chat.createdAt!!
             )

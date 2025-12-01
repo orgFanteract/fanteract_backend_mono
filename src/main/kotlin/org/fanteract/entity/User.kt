@@ -17,6 +17,7 @@ class User(
     val userId: Long = 0L,
     @Column(unique = true) val email: String,
     val password: String,
+    val name: String,
     val balance: Int = 0,
     val activePoint: Int = 0,
     val passExpiredAt: LocalDateTime? = null,
