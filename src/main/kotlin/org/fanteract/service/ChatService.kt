@@ -139,7 +139,8 @@ class ChatService(
             )
 
         return SendChatResponseDto(
-            chatId = chat.chatId,
+            userId = userId,
+            content = chat.content,
             createdAt = chat.createdAt!!,
         )
     }

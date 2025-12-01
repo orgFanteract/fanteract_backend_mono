@@ -92,13 +92,17 @@ class ChatAPI(
     @MessageMapping("/chat.{chatroomId}") // 다음 url path를 통해 발동
     @SendTo("/subscribe/chat.{chatroomId}") // 해당 결과는 다음 path를 구독하는 클라이언트에게 전달
     fun sendChat(
+        principal: Principal,
         sendChatRequestDto: SendChatRequestDto,
         @DestinationVariable chatroomId: Long
     ): SendChatResponseDto{
-        val userId = 1L
+//        if (principal == null){
+//            throw NoSuchElementException("조건에 맞는 토큰이 존재하지 않습니다")
+//        }
+        val userId = principal.name.toLong()
+        println("userId: $userId chatroomId: $chatroomId content:${sendChatRequestDto.content}")
         val response = chatService.sendChat(sendChatRequestDto, chatroomId, userId)
 
         return response
     }
-
 }

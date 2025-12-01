@@ -25,6 +25,7 @@ data class LeaveChatroomResponseDto(
 )
 
 data class SendChatResponseDto(
-    val chatId: Long,
+    val userId: Long,
+    val content: String,
     val createdAt: LocalDateTime,
 )
