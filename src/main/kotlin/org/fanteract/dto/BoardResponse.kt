@@ -35,3 +35,7 @@ data class ReadBoardDetailResponse(
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
 )
+
+data class CreateHeartInBoardResponse(
+    val boardHeartId: Long,
+)

@@ -1,12 +1,14 @@
 package org.fanteract.service
 
 import org.fanteract.domain.BoardHeartReader
+import org.fanteract.domain.BoardHeartWriter
 import org.fanteract.domain.BoardReader
 import org.fanteract.domain.BoardWriter
 import org.fanteract.domain.CommentReader
 import org.fanteract.domain.CommentWriter
 import org.fanteract.dto.CreateBoardRequest
 import org.fanteract.dto.CreateBoardResponse
+import org.fanteract.dto.CreateHeartInBoardResponse
 import org.fanteract.dto.ReadBoardDetailResponse
 import org.fanteract.dto.ReadBoardListResponse
 import org.fanteract.dto.ReadBoardResponse
@@ -22,6 +24,7 @@ class BoardService(
     private val boardWriter: BoardWriter,
     private val commentReader: CommentReader,
     private val boardHeartReader: BoardHeartReader,
+    private val boardHeartWriter: BoardHeartWriter,
 ) {
     fun createBoard(
         createBoardRequest: CreateBoardRequest,
@@ -172,5 +175,26 @@ class BoardService(
                 title = updateBoardRequest.title,
                 content = updateBoardRequest.content,
             )
+    }
+
+    fun createHeartInBoard(boardId: Long, userId: Long): CreateHeartInBoardResponse{
+        if (boardHeartReader.existsByUserIdAndBoardId(userId, boardId)){
+            throw NoSuchElementException("조건에 맞는 게시글 좋아요 내용이 이미 존재합니다")
+        }
+
+        val response =
+            boardHeartWriter.create(
+                userId = userId,
+                boardId = boardId,
+            )
+
+        return CreateHeartInBoardResponse(response.boardHeartId)
+    }
+
+    fun deleteHeartInBoard(boardId: Long, userId: Long) {
+        boardHeartWriter.delete(
+            userId = userId,
+            boardId = boardId,
+        )
     }
 }

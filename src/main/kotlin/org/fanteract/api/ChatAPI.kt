@@ -1,5 +1,6 @@
 package org.fanteract.api
 
+import io.swagger.v3.oas.annotations.Operation
 import jakarta.servlet.http.HttpServletRequest
 import org.fanteract.annotation.LoginRequired
 import org.fanteract.config.JwtParser
@@ -25,6 +26,7 @@ class ChatAPI(
 ) {
     // 채팅방 생성
     @LoginRequired
+    @Operation(summary = "채팅방 생성")
     @PostMapping("/chatroom")
     fun createChatroom(
         request: HttpServletRequest,
@@ -38,6 +40,7 @@ class ChatAPI(
 
     // 유저 기반 채팅방 조회
     @LoginRequired
+    @Operation(summary = "사용자 소속 채팅방 조회")
     @GetMapping("/chatroom/user")
     fun readChatroomListByUserId(
         request: HttpServletRequest,
@@ -50,6 +53,7 @@ class ChatAPI(
 
     // 이름 기반 채팅방 조회
     @LoginRequired
+    @Operation(summary = "이름 기반 채팅방 조회")
     @GetMapping("/chatroom")
     fun readChatroomListByUserIdAndTitleContaining(
         @RequestParam("title") title: String,
@@ -63,6 +67,7 @@ class ChatAPI(
 
     // 채팅방 채팅내역 조회
     @LoginRequired
+    @Operation(summary = "채팅 내역 조회")
     @GetMapping("{chatroomId}/chat")
     fun readChatByChatroomId(
         request: HttpServletRequest,
@@ -86,6 +91,7 @@ class ChatAPI(
 
     // 채팅방 채팅내역 조회
     @LoginRequired
+    @Operation(summary = "채팅 내역 기반 채팅 조회")
     @PostMapping("{chatroomId}/chat")
     fun readChatContainingByChatroomId(
         request: HttpServletRequest,
@@ -109,6 +115,7 @@ class ChatAPI(
 
     // 특정 채팅방 조회
     @LoginRequired
+    @Operation(summary = "아이디 기반 채팅방 조회")
     @GetMapping("{chatroomId}/chatroom/summary")
     fun readChatroomSummaryById(
         request: HttpServletRequest,
@@ -120,10 +127,9 @@ class ChatAPI(
         return ResponseEntity.ok().body(response)
     }
 
-
-
     // 특정 채팅방 접속
     @LoginRequired
+    @Operation(summary = "채팅방 입장")
     @PostMapping("/{chatroomId}/join")
     fun joinChatroom(
         request: HttpServletRequest,
@@ -137,6 +143,7 @@ class ChatAPI(
 
     // 특정 채팅방 탈퇴
     @LoginRequired
+    @Operation(summary = "채팅방 퇴장")
     @PostMapping("/{chatroomId}/leave")
     fun leaveChatroom(
         request: HttpServletRequest,

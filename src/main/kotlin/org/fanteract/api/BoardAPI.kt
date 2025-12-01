@@ -1,11 +1,13 @@
 package org.fanteract.api
 
+import io.swagger.v3.oas.annotations.Operation
 import jakarta.servlet.http.HttpServletRequest
 import org.fanteract.annotation.LoginRequired
 import org.fanteract.config.JwtParser
 import org.fanteract.dto.*
 import org.fanteract.service.BoardService
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,6 +23,7 @@ class BoardAPI(
     private val boardService: BoardService,
 ) {
     @LoginRequired
+    @Operation(summary = "게시글 생성")
     @PostMapping()
     fun createBoard(
         request: HttpServletRequest,
@@ -34,6 +37,7 @@ class BoardAPI(
 
     // 사용자 작성 게시글 조회
     @LoginRequired
+    @Operation(summary = "사용자 소유 게시글 조회")
     @GetMapping("/user")
     fun readBoardByUserId(
         request: HttpServletRequest,
@@ -48,6 +52,7 @@ class BoardAPI(
 
     // 전체 게시글 조회
     @LoginRequired
+    @Operation(summary = "전체 게시글 조회")
     @GetMapping("")
     fun readBoard(
         @RequestParam("page", defaultValue = "0") page: Int,
@@ -63,6 +68,7 @@ class BoardAPI(
 
     // 특정 게시글 상세 조회
     @LoginRequired
+    @Operation(summary = "특정 게시글 상세 조회")
     @GetMapping("/{boardId}/board")
     fun readBoardDetail(
         @PathVariable boardId: Long,
@@ -72,7 +78,9 @@ class BoardAPI(
         return ResponseEntity.ok().body(response)
     }
 
+    // 게시글 수정
     @LoginRequired
+    @Operation(summary = "게시글 수정")
     @PutMapping("/{boardId}")
     fun updateBoard(
         request: HttpServletRequest,
@@ -85,5 +93,31 @@ class BoardAPI(
         return ResponseEntity.ok().build()
     }
 
+    // 게시글 좋아요 선택
+    @LoginRequired
+    @Operation(summary = "게시글 좋아요 생성")
+    @PostMapping("/{boardId}/heart")
+    fun createHeartInBoard(
+        request: HttpServletRequest,
+        @PathVariable boardId: Long,
+    ): ResponseEntity<CreateHeartInBoardResponse>{
+        val userId = JwtParser.extractKey(request, "userId")
+        val response = boardService.createHeartInBoard(boardId, userId)
 
+        return ResponseEntity.ok().body(response)
+    }
+
+    // 게시글 좋아요 취소
+    @LoginRequired
+    @Operation(summary = "게시글 좋아요 해제")
+    @DeleteMapping("/{boardId}/heart")
+    fun deleteHeartInBoard(
+        request: HttpServletRequest,
+        @PathVariable boardId: Long,
+    ): ResponseEntity<Void>{
+        val userId = JwtParser.extractKey(request, "userId")
+        boardService.deleteHeartInBoard(boardId, userId)
+
+        return ResponseEntity.ok().build()
+    }
 }
