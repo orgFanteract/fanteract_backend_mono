@@ -1,6 +1,7 @@
 package org.fanteract.domain
 
 import org.fanteract.entity.Chatroom
+import org.fanteract.enumerate.Status
 import org.fanteract.repo.ChatroomRepo
 import org.springframework.stereotype.Component
 
@@ -27,13 +28,20 @@ class ChatroomReader(
     }
 
     fun existsById(chatroomId: Long){
-        if (!chatroomRepo.existsById(chatroomId)){
+        val chatroom = chatroomRepo.findById(chatroomId).
+            orElseThrow { NoSuchElementException("조건에 맞는 채팅방이 존재하지 않습니다") }
+
+        if (chatroom.status == Status.DELETED){
             throw NoSuchElementException("조건에 맞는 채팅방이 존재하지 않습니다")
         }
     }
 
     fun findByUserIdAndTitleContaining(userId: Long, title: String): List<Chatroom> {
         return chatroomRepo.findByUserIdAndTitleContaining(userId, title)
+    }
+
+    fun countByUserId(userId: Long): Long {
+        return chatroomRepo.countByUserId(userId)
     }
 
 }

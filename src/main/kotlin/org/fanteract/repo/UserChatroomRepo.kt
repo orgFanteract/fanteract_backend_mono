@@ -6,6 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface UserChatroomRepo: JpaRepository<UserChatroom, Long> {
-    fun existsByUserIdAndChatroomId(userId: Long, chatroomId: Long): Boolean
     fun findByUserIdAndChatroomId(userId: Long, chatroomId: Long): List<UserChatroom>
 }

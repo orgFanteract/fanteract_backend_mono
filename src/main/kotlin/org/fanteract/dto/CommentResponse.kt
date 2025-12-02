@@ -1,5 +1,6 @@
 package org.fanteract.dto
 
+import org.fanteract.enumerate.RiskLevel
 import java.time.LocalDateTime
 
 data class ReadCommentListResponse(
@@ -22,7 +23,7 @@ data class ReadCommentResponse(
 
 data class CreateCommentResponse(
     val commentId: Long?,
-    val isFiltered: Boolean,
+    val riskLevel: RiskLevel,
 )
 
 data class CreateHeartInCommentResponse(

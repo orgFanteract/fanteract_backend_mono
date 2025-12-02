@@ -16,10 +16,10 @@ enum class ChatroomJoinStatus{
     LEAVE,
 }
 
-enum class FilterAction {
-    ALLOW,     // 그냥 통과
-    WARN,      // 소프트 경고 (예: 저장은 하되, 나중에 신고/리뷰 후보)
-    BLOCK,     // 저장/전송 자체 금지
+enum class RiskLevel {
+    ALLOW,
+    WARN,
+    BLOCK,
 }
 
 enum class ActivePoint(

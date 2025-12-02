@@ -1,6 +1,7 @@
 package org.fanteract.domain
 
 import org.fanteract.entity.Chat
+import org.fanteract.enumerate.RiskLevel
 import org.fanteract.repo.ChatRepo
 import org.springframework.stereotype.Component
 import org.springframework.data.domain.Page
@@ -26,5 +27,18 @@ class ChatReader(
         pageable: PageRequest
     ): Page<Chat> {
         return chatRepo.findByUserIdAndChatroomIdAndContentContaining(userId, chatroomId, content, pageable)
+    }
+
+
+    fun countByUserId(userId: Long): Long {
+        return chatRepo.countByUserId(userId)
+    }
+
+    fun countByUserIdAndRiskLevel(userId: Long, riskLevel: RiskLevel): Long {
+        return chatRepo.countByUserIdAndRiskLevel(userId, riskLevel)
+    }
+
+    fun findByUserIdAndRiskLevel(userId: Long, riskLevel: RiskLevel, pageable: Pageable): Page<Chat> {
+        return chatRepo.findByUserIdAndRiskLevel(userId, riskLevel, pageable)
     }
 }

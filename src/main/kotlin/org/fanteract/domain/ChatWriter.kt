@@ -2,6 +2,7 @@ package org.fanteract.domain
 
 import org.fanteract.entity.Chat
 import org.fanteract.entity.Chatroom
+import org.fanteract.enumerate.RiskLevel
 import org.fanteract.repo.ChatRepo
 import org.springframework.stereotype.Component
 import kotlin.String
@@ -13,13 +14,15 @@ class ChatWriter(
     fun create(
         content: String,
         chatroomId: Long,
-        userId: Long
+        userId: Long,
+        riskLevel: RiskLevel,
     ): Chat {
         return chatRepo.save(
             Chat(
                 content = content,
                 chatroomId = chatroomId,
                 userId = userId,
+                riskLevel = riskLevel,
             )
         )
     }

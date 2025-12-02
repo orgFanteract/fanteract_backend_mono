@@ -9,12 +9,11 @@ import org.fanteract.domain.CommentWriter
 import org.fanteract.domain.UserReader
 import org.fanteract.domain.UserWriter
 import org.fanteract.dto.*
-import org.fanteract.entity.CommentHeart
 import org.fanteract.enumerate.ActivePoint
 import org.fanteract.enumerate.AlarmStatus
 import org.fanteract.enumerate.Balance
 import org.fanteract.enumerate.ContentType
-import org.fanteract.enumerate.FilterAction
+import org.fanteract.enumerate.RiskLevel
 import org.fanteract.filter.ProfanityFilterService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -132,18 +131,11 @@ class CommentService(
         userWriter.updateBalance(userId, -Balance.COMMENT.cost)
 
         // 게시글 필터링 진행
-        val filterAction =
+        val riskLevel =
             profanityFilterService.checkProfanityAndUpdateAbusePoint(
                 userId = userId,
                 text = createCommentRequest.content,
             )
-
-        if (filterAction == FilterAction.BLOCK){
-            return CreateCommentResponse(
-                commentId = null,
-                isFiltered = true
-            )
-        }
 
         // 코멘트 생성
         val comment =
@@ -151,13 +143,16 @@ class CommentService(
                 boardId = boardId,
                 userId = userId,
                 content = createCommentRequest.content,
+                riskLevel = riskLevel,
             )
 
         // 활동 점수 변경
-        userWriter.updateActivePoint(
-            userId = userId,
-            activePoint = ActivePoint.COMMENT.point
-        )
+        if (riskLevel != RiskLevel.BLOCK) {
+            userWriter.updateActivePoint(
+                userId = userId,
+                activePoint = ActivePoint.COMMENT.point
+            )
+        }
 
         // 코멘트 및 게시글 생성자 전체에게 알림 전송
         val commentUserList = commentReader.findByBoardId(boardId).map{it.userId}.distinct()
@@ -185,7 +180,7 @@ class CommentService(
         // 반환
         return CreateCommentResponse(
             commentId = comment.commentId,
-            isFiltered = false
+            riskLevel = riskLevel,
         )
     }
     fun updateComment(commentId: Long, userId: Long, updateCommentRequest: UpdateCommentRequest) {

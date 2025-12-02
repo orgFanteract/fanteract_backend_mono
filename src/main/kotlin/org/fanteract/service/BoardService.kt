@@ -19,7 +19,7 @@ import org.fanteract.enumerate.ActivePoint
 import org.fanteract.enumerate.AlarmStatus
 import org.fanteract.enumerate.Balance
 import org.fanteract.enumerate.ContentType
-import org.fanteract.enumerate.FilterAction
+import org.fanteract.enumerate.RiskLevel
 import org.fanteract.filter.ProfanityFilterService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -54,18 +54,11 @@ class BoardService(
         userWriter.updateBalance(userId, -Balance.BOARD.cost)
         
         // 게시글 필터링 진행
-        val filterAction =
+        val riskLevel =
             profanityFilterService.checkProfanityAndUpdateAbusePoint(
                 userId = userId,
                 text = "${createBoardRequest.title}\n${createBoardRequest.content}",
             )
-
-        if (filterAction == FilterAction.BLOCK){
-            return CreateBoardResponse(
-                boardId = null,
-                isFiltered = true
-            )
-        }
 
         // 게시글 생성
         val board =
@@ -73,17 +66,20 @@ class BoardService(
                 title = createBoardRequest.title,
                 content = createBoardRequest.content,
                 userId = userId,
+                riskLevel = riskLevel,
             )
 
         // 활동 점수 변경
-        userWriter.updateActivePoint(
-            userId = userId,
-            activePoint = ActivePoint.BOARD.point
-        )
+        if (riskLevel != RiskLevel.BLOCK) {
+            userWriter.updateActivePoint(
+                userId = userId,
+                activePoint = ActivePoint.BOARD.point
+            )
+        }
 
         return CreateBoardResponse(
             boardId = board.boardId,
-            isFiltered = false
+            riskLevel = riskLevel,
         )
     }
 

@@ -3,7 +3,7 @@ package org.fanteract.filter
 import mu.KotlinLogging
 import org.fanteract.domain.UserWriter
 import org.fanteract.dto.FilterResult
-import org.fanteract.enumerate.FilterAction
+import org.fanteract.enumerate.RiskLevel
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,11 +18,11 @@ class ProfanityFilterService(
         // 1단계: 룰 기반 필터
         val ruleResult = ruleBasedFilter.filter(text)
 
-        if (ruleResult.action == FilterAction.BLOCK) {
+        if (ruleResult.action == RiskLevel.BLOCK) {
             return ruleResult
         }
 
-        else if (ruleResult.action == FilterAction.WARN) {
+        else if (ruleResult.action == RiskLevel.WARN) {
             return ruleResult
         }
 
@@ -31,19 +31,19 @@ class ProfanityFilterService(
 
         return when {
             score >= 0.9 -> FilterResult(
-                action = FilterAction.BLOCK,
+                action = RiskLevel.BLOCK,
                 reason = "ML: 고위험 공격성 감지",
                 score = score
             )
 
             score >= 0.6 -> FilterResult(
-                action = FilterAction.WARN,
+                action = RiskLevel.WARN,
                 reason = "ML: 중간 수준 공격성 감지",
                 score = score
             )
 
             else -> FilterResult(
-                action = FilterAction.ALLOW,
+                action = RiskLevel.ALLOW,
                 score = score
             )
         }
@@ -52,11 +52,11 @@ class ProfanityFilterService(
     fun checkProfanityAndUpdateAbusePoint(
         userId: Long,
         text: String,
-    ): FilterAction {
+    ): RiskLevel {
         val filterResult = filter(text)
 
         when (filterResult.action) {
-            FilterAction.BLOCK -> {
+            RiskLevel.BLOCK -> {
                 userWriter.updateAbusePoint(
                     userId = userId,
                     abusePoint = 10
@@ -65,7 +65,7 @@ class ProfanityFilterService(
                 log.warn { "부적절한 표현이 포함되어 부정 점수가 10점 적용되었습니다" }
             }
 
-            FilterAction.WARN -> {
+            RiskLevel.WARN -> {
                 userWriter.updateAbusePoint(
                     userId = userId,
                     abusePoint = 5

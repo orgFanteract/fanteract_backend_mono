@@ -1,6 +1,7 @@
 package org.fanteract.domain
 
 import org.fanteract.entity.Board
+import org.fanteract.enumerate.RiskLevel
 import org.fanteract.repo.BoardRepo
 import org.springframework.stereotype.Component
 
@@ -11,13 +12,15 @@ class BoardWriter(
     fun create(
         title: String,
         content: String,
-        userId: Long
+        userId: Long,
+        riskLevel: RiskLevel,
     ): Board {
         val board = boardRepo.save(
             Board(
                 title = title,
                 content = content,
                 userId = userId,
+                riskLevel = riskLevel,
             )
         )
 

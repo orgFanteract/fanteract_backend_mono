@@ -1,6 +1,7 @@
 package org.fanteract.domain
 
 import org.fanteract.entity.Comment
+import org.fanteract.enumerate.RiskLevel
 import org.fanteract.enumerate.Status
 import org.fanteract.repo.CommentRepo
 import org.springframework.stereotype.Component
@@ -13,12 +14,14 @@ class CommentWriter(
     fun create(
         boardId: Long,
         userId: Long,
-        content: String
+        content: String,
+        riskLevel: RiskLevel,
     ): Comment {
         val comment = Comment(
             boardId = boardId,
             userId = userId,
-            content = content
+            content = content,
+            riskLevel = riskLevel,
         )
         return commentRepo.save(comment)
     }
