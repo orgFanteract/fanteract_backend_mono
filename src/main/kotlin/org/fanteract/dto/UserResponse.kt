@@ -1,5 +1,7 @@
 package org.fanteract.dto
 
+import org.fanteract.enumerate.RiskLevel
+
 data class UserSignInResponseDto(
     val token: String,
 )
@@ -30,4 +32,50 @@ data class UserScore(
     val activePoint: Int,
     val abusePoint: Int,
     val balance: Int,
+)
+
+data class ReadRestrictedBoardListResponse(
+    val contents: List<ReadRestrictedBoardResponse>,
+    val page: Int,
+    val size: Int,
+    val totalElements: Long,
+    val totalPages: Int,
+    val hasNext: Boolean,
+)
+
+data class ReadRestrictedCommentListResponse(
+    val contents: List<ReadRestrictedCommentResponse>,
+    val page: Int,
+    val size: Int,
+    val totalElements: Long,
+    val totalPages: Int,
+    val hasNext: Boolean,
+)
+
+data class ReadRestrictedChatListResponse(
+    val contents: List<ReadRestrictedChatResponse>,
+    val page: Int,
+    val size: Int,
+    val totalElements: Long,
+    val totalPages: Int,
+    val hasNext: Boolean,
+)
+
+data class ReadRestrictedBoardResponse(
+    val boardId: Long,
+    val title: String,
+    val content: String,
+    val riskLevel: RiskLevel,
+)
+
+data class ReadRestrictedCommentResponse(
+    val commentId: Long,
+    val content: String,
+    val riskLevel: RiskLevel,
+)
+
+data class ReadRestrictedChatResponse(
+    val chatId: Long,
+    val content: String,
+    val riskLevel: RiskLevel,
 )

@@ -2,8 +2,10 @@ package org.fanteract.domain
 
 import org.fanteract.entity.Board
 import org.fanteract.entity.Chat
+import org.fanteract.enumerate.RiskLevel
 import org.fanteract.repo.BoardRepo
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 
@@ -31,5 +33,13 @@ class BoardReader(
 
     fun countByUserId(userId: Long): Long {
         return boardRepo.countByUserId(userId)
+    }
+
+    fun countByUserIdAndRiskLevel(userId: Long, riskLevel: RiskLevel): Long {
+        return boardRepo.countByUserIdAndRiskLevel(userId, riskLevel)
+    }
+
+    fun findByUserIdAndRiskLevel(userId: Long, riskLevel: RiskLevel, pageable: PageRequest): Page<Board> {
+        return boardRepo.findByUserAndRiskLevel(userId, riskLevel, pageable)
     }
 }

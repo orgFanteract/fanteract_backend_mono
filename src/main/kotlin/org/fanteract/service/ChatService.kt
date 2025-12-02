@@ -11,7 +11,6 @@ import org.fanteract.domain.UserReader
 import org.fanteract.domain.UserWriter
 import org.fanteract.dto.CreateChatroomRequest
 import org.fanteract.dto.CreateChatroomResponse
-import org.fanteract.dto.CreateCommentResponse
 import org.fanteract.dto.JoinChatroomResponse
 import org.fanteract.dto.LeaveChatroomResponseDto
 import org.fanteract.dto.ReadChatContainingListResponse
@@ -27,7 +26,7 @@ import org.fanteract.entity.UserChatroom
 import org.fanteract.enumerate.ActivePoint
 import org.fanteract.enumerate.Balance
 import org.fanteract.enumerate.ChatroomJoinStatus
-import org.fanteract.enumerate.FilterAction
+import org.fanteract.enumerate.RiskLevel
 import org.fanteract.filter.ProfanityFilterService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -103,6 +102,9 @@ class ChatService(
         // 채팅방 존재여부 확인
         chatroomReader.existsById(chatroomId)
 
+        // 사용자 존재여부 확인
+        userReader.existsById(userId)
+
         // 채팅방 접속기록 확인
         val preUserChatroom = userChatroomReader.findByUserIdAndChatroomId(userId, chatroomId)
 
@@ -127,6 +129,9 @@ class ChatService(
     ): LeaveChatroomResponseDto {
         // 채팅방 존재여부 확인
         chatroomReader.existsById(chatroomId)
+
+        // 사용자 존재여부 확인
+        userReader.existsById(userId)
 
         // 채팅방 접속기록 확인
         val preUserChatroom = userChatroomReader.findByUserIdAndChatroomId(userId, chatroomId)
@@ -161,38 +166,34 @@ class ChatService(
         userWriter.updateBalance(userId, -Balance.CHAT.cost)
         
         // 게시글 필터링 진행
-        val filterAction =
+        val riskLevel =
             profanityFilterService.checkProfanityAndUpdateAbusePoint(
                 userId = userId,
                 text = sendChatRequestDto.content,
             )
-
-        if (filterAction == FilterAction.BLOCK){
-            return SendChatResponse(
-                isFiltered = true
-            )
-        }
 
         val chat =
             chatWriter.create(
                 content = sendChatRequestDto.content,
                 chatroomId = chatroomId,
                 userId = userId,
+                riskLevel = riskLevel,
             )
-        
 
         // 활동 점수 변경
-        userWriter.updateActivePoint(
-            userId = userId,
-            activePoint = ActivePoint.CHAT.point
-        )
+        if (riskLevel != RiskLevel.BLOCK) {
+            userWriter.updateActivePoint(
+                userId = userId,
+                activePoint = ActivePoint.CHAT.point
+            )
+        }
 
         return SendChatResponse(
             chatId = chat.chatId,
             userName = user.name,
             content = chat.content,
             createdAt = chat.createdAt!!,
-            isFiltered = false
+            riskLevel = riskLevel,
         )
     }
 

@@ -1,5 +1,6 @@
 package org.fanteract.dto
 
+import org.fanteract.enumerate.RiskLevel
 import java.time.LocalDateTime
 
 data class CreateChatroomResponse(
@@ -61,5 +62,5 @@ data class SendChatResponse(
     val userName: String? = null,
     val content: String? = null,
     val createdAt: LocalDateTime? = null,
-    val isFiltered: Boolean,
+    val riskLevel: RiskLevel,
 )

@@ -1,10 +1,11 @@
 package org.fanteract.dto
 
+import org.fanteract.enumerate.RiskLevel
 import java.time.LocalDateTime
 
 data class CreateBoardResponse(
     val boardId: Long?,
-    val isFiltered: Boolean,
+    val riskLevel: RiskLevel,
 )
 
 data class ReadBoardListResponse(

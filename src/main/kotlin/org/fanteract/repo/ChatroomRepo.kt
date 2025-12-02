@@ -3,10 +3,41 @@ package org.fanteract.repo
 import org.fanteract.entity.Chatroom
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 
 @Repository
 interface ChatroomRepo: JpaRepository<Chatroom, Long> {
-    fun findByUserId(userId: Long): List<Chatroom>
-    fun findByUserIdAndTitleContaining(userId: Long, title: String): List<Chatroom>
-    fun countByUserId(userId: Long): Long
+
+    @Query("""
+        SELECT c
+        FROM Chatroom c
+        WHERE c.userId = :userId
+          AND c.status = 'ACTIVATED'
+    """)
+    fun findByUserId(
+        @Param("userId") userId: Long
+    ): List<Chatroom>
+
+    @Query("""
+        SELECT c
+        FROM Chatroom c
+        WHERE c.userId = :userId
+          AND c.title LIKE %:title%
+          AND c.status = 'ACTIVATED'
+    """)
+    fun findByUserIdAndTitleContaining(
+        @Param("userId") userId: Long,
+        @Param("title") title: String,
+    ): List<Chatroom>
+
+    @Query("""
+        SELECT COUNT(c)
+        FROM Chatroom c
+        WHERE c.userId = :userId
+          AND c.status = 'ACTIVATED'
+    """)
+    fun countByUserId(
+        @Param("userId") userId: Long
+    ): Long
 }

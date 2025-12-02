@@ -1,6 +1,7 @@
 package org.fanteract.domain
 
 import org.fanteract.entity.User
+import org.fanteract.enumerate.Status
 import org.fanteract.repo.UserRepo
 import org.springframework.stereotype.Component
 
@@ -18,5 +19,13 @@ class UserReader(
 
     fun findById(userId: Long): User {
         return userRepo.findById(userId).orElseThrow{NoSuchElementException("조건에 맞는 사용자가 존재하지 않습니다")}
+    }
+
+    fun existsById(userId: Long) {
+        val user = userRepo.findById(userId).orElseThrow{NoSuchElementException("조건에 맞는 사용자가 존재하지 않습니다")}
+
+        if (user.status == Status.DELETED){
+            throw NoSuchElementException("조건에 맞는 사용자가 존재하지 않습니다")
+        }
     }
 }

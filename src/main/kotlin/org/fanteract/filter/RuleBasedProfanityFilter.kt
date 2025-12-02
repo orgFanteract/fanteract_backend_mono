@@ -1,7 +1,7 @@
 package org.fanteract.filter
 
 import org.fanteract.dto.FilterResult
-import org.fanteract.enumerate.FilterAction
+import org.fanteract.enumerate.RiskLevel
 import org.springframework.stereotype.Component
 
 @Component
@@ -26,7 +26,7 @@ class RuleBasedProfanityFilter(
         // 하드 욕설: BLOCK
         if (hardProfanityPatterns.any { it.containsMatchIn(text) }) {
             return FilterResult(
-                action = FilterAction.BLOCK,
+                action = RiskLevel.BLOCK,
                 reason = "강한 욕설/모욕 감지"
             )
         }
@@ -34,13 +34,13 @@ class RuleBasedProfanityFilter(
         // 부드러운 욕설: WARN
         if (softProfanityPatterns.any { it.containsMatchIn(text) }) {
             return FilterResult(
-                action = FilterAction.WARN,
+                action = RiskLevel.WARN,
                 reason = "공격적인 표현 감지"
             )
         }
 
         return FilterResult(
-            action = FilterAction.ALLOW
+            action = RiskLevel.ALLOW
         )
     }
 }
