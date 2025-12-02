@@ -1,6 +1,7 @@
 package org.fanteract.service
 
 import jakarta.persistence.Column
+import mu.KotlinLogging
 import org.fanteract.domain.BoardHeartReader
 import org.fanteract.domain.BoardHeartWriter
 import org.fanteract.domain.BoardReader
@@ -16,13 +17,18 @@ import org.fanteract.dto.ReadBoardDetailResponse
 import org.fanteract.dto.ReadBoardListResponse
 import org.fanteract.dto.ReadBoardResponse
 import org.fanteract.dto.UpdateBoardRequest
+import org.fanteract.enumerate.ActivePoint
+import org.fanteract.enumerate.FilterAction
+import org.fanteract.filter.ProfanityFilterService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import kotlin.Long
 import kotlin.String
 
+@Transactional
 @Service
 class BoardService(
     private val boardReader: BoardReader,
@@ -32,11 +38,27 @@ class BoardService(
     private val boardHeartWriter: BoardHeartWriter,
     private val userReader: UserReader,
     private val userWriter: UserWriter,
+    private val profanityFilterService: ProfanityFilterService,
 ) {
     fun createBoard(
         createBoardRequest: CreateBoardRequest,
         userId: Long
     ): CreateBoardResponse {
+        // 게시글 필터링 진행
+        val filterAction =
+            profanityFilterService.checkProfanityAndUpdateAbusePoint(
+                userId = userId,
+                text = "${createBoardRequest.title}\n${createBoardRequest.content}",
+            )
+
+        if (filterAction == FilterAction.BLOCK){
+            return CreateBoardResponse(
+                boardId = null,
+                isFiltered = true
+            )
+        }
+
+        // 게시글 생성
         val board =
             boardWriter.create(
                 title = createBoardRequest.title,
@@ -47,10 +69,13 @@ class BoardService(
         // 활동 점수 변경
         userWriter.updateActivePoint(
             userId = userId,
-            activePoint = 10
+            activePoint = ActivePoint.BOARD.point
         )
 
-        return CreateBoardResponse(board.boardId)
+        return CreateBoardResponse(
+            boardId = board.boardId,
+            isFiltered = false
+        )
     }
 
     fun readBoardByUserId(page: Int, size: Int, userId: Long): ReadBoardListResponse {
@@ -217,7 +242,7 @@ class BoardService(
         // 활동 점수 변경
         userWriter.updateActivePoint(
             userId = userId,
-            activePoint = 1
+            activePoint = ActivePoint.HEART.point
         )
 
         return CreateHeartInBoardResponse(response.boardHeartId)
@@ -228,9 +253,16 @@ class BoardService(
             throw NoSuchElementException("조건에 맞는 게시글이 존재하지 않습니다")
         }
 
+        // 하트 해제
         boardHeartWriter.delete(
             userId = userId,
             boardId = boardId,
+        )
+
+        // 활동 점수 반납
+        userWriter.updateActivePoint(
+            userId = userId,
+            activePoint = -ActivePoint.HEART.point
         )
     }
 }

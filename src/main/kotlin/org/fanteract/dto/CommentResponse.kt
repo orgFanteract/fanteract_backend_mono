@@ -21,7 +21,8 @@ data class ReadCommentResponse(
 )
 
 data class CreateCommentResponse(
-    val commentId: Long,
+    val commentId: Long?,
+    val isFiltered: Boolean,
 )
 
 data class CreateHeartInCommentResponse(

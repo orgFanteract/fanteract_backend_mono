@@ -11,6 +11,7 @@ import org.fanteract.domain.UserReader
 import org.fanteract.domain.UserWriter
 import org.fanteract.dto.CreateChatroomRequest
 import org.fanteract.dto.CreateChatroomResponse
+import org.fanteract.dto.CreateCommentResponse
 import org.fanteract.dto.JoinChatroomResponse
 import org.fanteract.dto.LeaveChatroomResponseDto
 import org.fanteract.dto.ReadChatContainingListResponse
@@ -21,9 +22,12 @@ import org.fanteract.dto.ReadChatResponse
 import org.fanteract.dto.ReadChatroomListResponse
 import org.fanteract.dto.ReadChatroomResponse
 import org.fanteract.dto.SendChatRequestDto
-import org.fanteract.dto.SendChatResponseDto
+import org.fanteract.dto.SendChatResponse
 import org.fanteract.entity.UserChatroom
+import org.fanteract.enumerate.ActivePoint
 import org.fanteract.enumerate.ChatroomJoinStatus
+import org.fanteract.enumerate.FilterAction
+import org.fanteract.filter.ProfanityFilterService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -42,6 +46,7 @@ class ChatService(
     private val chatReader: ChatReader,
     private val userReader: UserReader,
     private val userWriter: UserWriter,
+    private val profanityFilterService: ProfanityFilterService
 ) {
     fun createChatroom(
         userId: Long,
@@ -54,7 +59,8 @@ class ChatService(
                 userId = userId,
             )
 
-        // 해당 채팅방에 참여 상태로 변경
+        // TODO: 해당 채팅방에 참여 상태로 변경
+
 
         return CreateChatroomResponse(
             chatroomId = chatroom.chatroomId,
@@ -143,7 +149,20 @@ class ChatService(
         sendChatRequestDto: SendChatRequestDto,
         chatroomId: Long,
         userId: Long
-    ): SendChatResponseDto {
+    ): SendChatResponse {
+        // 게시글 필터링 진행
+        val filterAction =
+            profanityFilterService.checkProfanityAndUpdateAbusePoint(
+                userId = userId,
+                text = sendChatRequestDto.content,
+            )
+
+        if (filterAction == FilterAction.BLOCK){
+            return SendChatResponse(
+                isFiltered = true
+            )
+        }
+
         val chat =
             chatWriter.create(
                 content = sendChatRequestDto.content,
@@ -156,13 +175,15 @@ class ChatService(
         // 활동 점수 변경
         userWriter.updateActivePoint(
             userId = userId,
-            activePoint = 1
+            activePoint = ActivePoint.CHAT.point
         )
 
-        return SendChatResponseDto(
+        return SendChatResponse(
+            chatId = chat.chatId,
             userName = user.name,
             content = chat.content,
             createdAt = chat.createdAt!!,
+            isFiltered = false
         )
     }
 
