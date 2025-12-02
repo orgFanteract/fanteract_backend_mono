@@ -1,5 +1,6 @@
 package org.fanteract.api
 
+import io.swagger.v3.oas.annotations.Operation
 import org.fanteract.dto.*
 import org.fanteract.service.UserService
 import org.springframework.beans.factory.annotation.Value
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 class UserAPI(
     private val userService: UserService,
 ) {
+    @Operation(summary = "로그인")
     @PostMapping("/sign-in")
     fun signIn(
         @RequestBody userSignInRequestDto: UserSignInRequestDto
@@ -23,7 +25,7 @@ class UserAPI(
         return ResponseEntity.ok(response)
     }
 
-
+    @Operation(summary = "회원 가입")
     @PostMapping("/sign-up")
     fun signUpWithCredential(
         @RequestBody userSignUpRequestDto: UserSignUpRequestDto,

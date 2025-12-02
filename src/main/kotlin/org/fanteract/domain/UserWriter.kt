@@ -43,4 +43,14 @@ class UserWriter(
 
         userRepo.save(user)
     }
+
+    fun updateBalance(
+        userId: Long,
+        balance: Int
+    ) {
+        val user = userRepo.findById(userId).orElseThrow{NoSuchElementException("조건에 맞는 사용자가 존재하지 않습니다")}
+        user.balance += balance
+
+        userRepo.save(user)
+    }
 }
