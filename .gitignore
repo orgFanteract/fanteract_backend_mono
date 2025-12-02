@@ -53,4 +53,6 @@ Thumbs.db
 bin/
 
 application.yml
+application-local.yml
+application-prod.yml
 application.properties
