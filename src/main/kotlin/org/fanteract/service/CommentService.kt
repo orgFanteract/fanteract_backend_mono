@@ -7,6 +7,9 @@ import org.fanteract.domain.CommentWriter
 import org.fanteract.domain.UserReader
 import org.fanteract.domain.UserWriter
 import org.fanteract.dto.*
+import org.fanteract.enumerate.ActivePoint
+import org.fanteract.enumerate.FilterAction
+import org.fanteract.filter.ProfanityFilterService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -21,6 +24,7 @@ class CommentService(
     private val commentHeartWriter: CommentHeartWriter,
     private val userReader: UserReader,
     private val userWriter: UserWriter,
+    private val profanityFilterService: ProfanityFilterService,
 ) {
     fun readCommentsByBoardId(
         boardId: Long,
@@ -106,7 +110,26 @@ class CommentService(
         )
     }
 
-    fun createComment(boardId: Long, userId: Long, createCommentRequest: CreateCommentRequest): CreateCommentResponse {
+    fun createComment(
+        boardId: Long,
+        userId: Long,
+        createCommentRequest: CreateCommentRequest
+    ): CreateCommentResponse {
+        // 게시글 필터링 진행
+        val filterAction =
+            profanityFilterService.checkProfanityAndUpdateAbusePoint(
+                userId = userId,
+                text = createCommentRequest.content,
+            )
+
+        if (filterAction == FilterAction.BLOCK){
+            return CreateCommentResponse(
+                commentId = null,
+                isFiltered = true
+            )
+        }
+
+        // 코멘트 생성
         val comment =
             commentWriter.create(
                 boardId = boardId,
@@ -117,10 +140,13 @@ class CommentService(
         // 활동 점수 변경
         userWriter.updateActivePoint(
             userId = userId,
-            activePoint = 3
+            activePoint = ActivePoint.COMMENT.point
         )
 
-        return CreateCommentResponse(commentId = comment.commentId)
+        return CreateCommentResponse(
+            commentId = comment.commentId,
+            isFiltered = false
+        )
     }
     fun updateComment(commentId: Long, userId: Long, updateCommentRequest: UpdateCommentRequest) {
         val preComment = commentReader.readById(commentId)
@@ -162,7 +188,7 @@ class CommentService(
         // 활동 점수 변경
         userWriter.updateActivePoint(
             userId = userId,
-            activePoint = 1
+            activePoint = ActivePoint.HEART.point
         )
 
         return CreateHeartInCommentResponse(response.commentHeartId)
@@ -173,9 +199,16 @@ class CommentService(
             throw NoSuchElementException("조건에 맞는 코멘트가 존재하지 않습니다")
         }
 
+        // 하트 삭제
         commentHeartWriter.delete(
             userId = userId,
             commentId = commentId,
+        )
+
+        // 활동 점수 반납
+        userWriter.updateActivePoint(
+            userId = userId,
+            activePoint = -ActivePoint.HEART.point
         )
     }
 }

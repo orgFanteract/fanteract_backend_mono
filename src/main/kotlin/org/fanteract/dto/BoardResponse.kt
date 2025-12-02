@@ -3,7 +3,8 @@ package org.fanteract.dto
 import java.time.LocalDateTime
 
 data class CreateBoardResponse(
-    val boardId: Long,
+    val boardId: Long?,
+    val isFiltered: Boolean,
 )
 
 data class ReadBoardListResponse(
