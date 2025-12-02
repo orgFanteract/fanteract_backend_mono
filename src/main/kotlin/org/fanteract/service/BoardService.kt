@@ -1,13 +1,10 @@
 package org.fanteract.service
 
-import jakarta.persistence.Column
-import mu.KotlinLogging
 import org.fanteract.domain.BoardHeartReader
 import org.fanteract.domain.BoardHeartWriter
 import org.fanteract.domain.BoardReader
 import org.fanteract.domain.BoardWriter
 import org.fanteract.domain.CommentReader
-import org.fanteract.domain.CommentWriter
 import org.fanteract.domain.UserReader
 import org.fanteract.domain.UserWriter
 import org.fanteract.dto.CreateBoardRequest
@@ -18,15 +15,14 @@ import org.fanteract.dto.ReadBoardListResponse
 import org.fanteract.dto.ReadBoardResponse
 import org.fanteract.dto.UpdateBoardRequest
 import org.fanteract.enumerate.ActivePoint
+import org.fanteract.enumerate.Balance
 import org.fanteract.enumerate.FilterAction
 import org.fanteract.filter.ProfanityFilterService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 import kotlin.Long
-import kotlin.String
 
 @Transactional
 @Service
@@ -44,6 +40,15 @@ class BoardService(
         createBoardRequest: CreateBoardRequest,
         userId: Long
     ): CreateBoardResponse {
+        // 사용자 잔여 포인트 확인
+        val user = userReader.findById(userId)
+        
+        if (user.balance < Balance.BOARD.cost){
+            throw IllegalArgumentException("비용이 부족합니다")
+        }
+
+        userWriter.updateBalance(userId, -Balance.BOARD.cost)
+        
         // 게시글 필터링 진행
         val filterAction =
             profanityFilterService.checkProfanityAndUpdateAbusePoint(
@@ -225,6 +230,16 @@ class BoardService(
     }
 
     fun createHeartInBoard(boardId: Long, userId: Long): CreateHeartInBoardResponse{
+        // 비용 검증 및 차감
+        val user = userReader.findById(userId)
+
+        if (user.balance < Balance.HEART.cost){
+            throw IllegalArgumentException("비용이 부족합니다")
+        }
+
+        userWriter.updateBalance(userId, -Balance.HEART.cost)
+        
+        // 존재 여부 검증
         if (boardHeartReader.existsByUserIdAndBoardId(userId, boardId)){
             throw NoSuchElementException("조건에 맞는 게시글 좋아요 내용이 이미 존재합니다")
         }

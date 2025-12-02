@@ -7,14 +7,12 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 import org.fanteract.entity.constant.BaseEntity
 
-
 @Entity
-@Table(name = "payments")
-class Payment (
+@Table(name = "products")
+class Product (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val paymentId: Long,
-    val userId: Long,
-    val second: Int,
+    val productId: Long,
+    val name: String,
     val cost: Int,
 ): BaseEntity()

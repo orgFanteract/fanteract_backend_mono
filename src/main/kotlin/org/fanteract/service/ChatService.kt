@@ -25,6 +25,7 @@ import org.fanteract.dto.SendChatRequestDto
 import org.fanteract.dto.SendChatResponse
 import org.fanteract.entity.UserChatroom
 import org.fanteract.enumerate.ActivePoint
+import org.fanteract.enumerate.Balance
 import org.fanteract.enumerate.ChatroomJoinStatus
 import org.fanteract.enumerate.FilterAction
 import org.fanteract.filter.ProfanityFilterService
@@ -150,6 +151,15 @@ class ChatService(
         chatroomId: Long,
         userId: Long
     ): SendChatResponse {
+        // 비용 검증 및 차감
+        val user = userReader.findById(userId)
+        
+        if (user.balance < Balance.CHAT.cost){
+            throw IllegalArgumentException("비용이 부족합니다")
+        }
+
+        userWriter.updateBalance(userId, -Balance.CHAT.cost)
+        
         // 게시글 필터링 진행
         val filterAction =
             profanityFilterService.checkProfanityAndUpdateAbusePoint(
@@ -169,8 +179,7 @@ class ChatService(
                 chatroomId = chatroomId,
                 userId = userId,
             )
-
-        val user = userReader.findById(chat.userId)
+        
 
         // 활동 점수 변경
         userWriter.updateActivePoint(

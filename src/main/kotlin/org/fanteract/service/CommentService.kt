@@ -8,6 +8,7 @@ import org.fanteract.domain.UserReader
 import org.fanteract.domain.UserWriter
 import org.fanteract.dto.*
 import org.fanteract.enumerate.ActivePoint
+import org.fanteract.enumerate.Balance
 import org.fanteract.enumerate.FilterAction
 import org.fanteract.filter.ProfanityFilterService
 import org.springframework.data.domain.PageRequest
@@ -115,6 +116,14 @@ class CommentService(
         userId: Long,
         createCommentRequest: CreateCommentRequest
     ): CreateCommentResponse {
+        val user = userReader.findById(userId)
+
+        if (user.balance < Balance.COMMENT.cost){
+            throw IllegalArgumentException("비용이 부족합니다")
+        }
+
+        userWriter.updateBalance(userId, -Balance.COMMENT.cost)
+
         // 게시글 필터링 진행
         val filterAction =
             profanityFilterService.checkProfanityAndUpdateAbusePoint(
@@ -171,6 +180,16 @@ class CommentService(
     }
 
     fun createHeartInComment(commentId: Long, userId: Long): CreateHeartInCommentResponse {
+        // 비용 검증 및 차감
+        val user = userReader.findById(userId)
+
+        if (user.balance < Balance.HEART.cost){
+            throw IllegalArgumentException("비용이 부족합니다")
+        }
+        
+        userWriter.updateBalance(userId, -Balance.HEART.cost)
+        
+        // 하트 중복 및 코멘트 존재 여부 검증
         if (commentHeartReader.existsByUserIdAndCommentId(userId, commentId)) {
             throw NoSuchElementException("조건에 맞는 코멘트 좋아요 내용이 이미 존재합니다")
         }

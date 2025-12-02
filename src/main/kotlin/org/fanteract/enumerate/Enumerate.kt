@@ -23,10 +23,19 @@ enum class FilterAction {
 }
 
 enum class ActivePoint(
-    val point: Int,   // ← 생성자 파라미터 정의
+    val point: Int,
 ) {
     BOARD(10),
     COMMENT(3),
+    CHAT(1),
+    HEART(1),
+}
+
+enum class Balance(
+    val cost: Int,
+) {
+    BOARD(3),
+    COMMENT(1),
     CHAT(1),
     HEART(1),
 }
