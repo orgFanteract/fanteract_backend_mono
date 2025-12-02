@@ -19,6 +19,10 @@ class CommentReader(
         return commentRepo.findByBoardId(boardId, pageable)
     }
 
+    fun findByBoardId(boardId: Long): List<Comment> {
+        return commentRepo.findByBoardId(boardId)
+    }
+
     fun findByUserId(userId: Long, pageable: Pageable): Page<Comment> {
         return commentRepo.findByUserId(userId, pageable)
     }

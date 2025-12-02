@@ -39,3 +39,11 @@ enum class Balance(
     CHAT(1),
     HEART(1),
 }
+
+enum class ContentType{
+    BOARD,
+    COMMENT,
+    CHAT,
+    BOARD_HEART,
+    COMMENT_HEART,
+}
