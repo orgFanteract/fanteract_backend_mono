@@ -40,4 +40,8 @@ class CommentReader(
     fun existsById(commentId: Long): Boolean {
         return commentRepo.existsById(commentId)
     }
+
+    fun countByUserId(userId: Long): Long {
+        return commentRepo.countByUserId(userId)
+    }
 }

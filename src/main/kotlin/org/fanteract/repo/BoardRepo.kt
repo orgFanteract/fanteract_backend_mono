@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface BoardRepo: JpaRepository<Board, Long> {
     fun findByUserId(userId: Long, pageable: Pageable): Page<Board>
+    fun countByUserId(userId: Long): Long
 }

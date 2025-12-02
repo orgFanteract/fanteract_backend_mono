@@ -28,4 +28,8 @@ class BoardReader(
     fun existsById(boardId: Long): Boolean {
         return boardRepo.existsById(boardId)
     }
+
+    fun countByUserId(userId: Long): Long {
+        return boardRepo.countByUserId(userId)
+    }
 }

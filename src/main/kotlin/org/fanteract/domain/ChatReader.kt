@@ -27,4 +27,9 @@ class ChatReader(
     ): Page<Chat> {
         return chatRepo.findByUserIdAndChatroomIdAndContentContaining(userId, chatroomId, content, pageable)
     }
+
+
+    fun countByUserId(userId: Long): Long {
+        return chatRepo.countByUserId(userId)
+    }
 }

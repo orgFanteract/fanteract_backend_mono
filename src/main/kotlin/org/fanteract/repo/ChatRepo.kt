@@ -21,4 +21,6 @@ interface ChatRepo: JpaRepository<Chat, Long>{
         content: String,
         pageable: PageRequest
     ): Page<Chat>
+
+    fun countByUserId(userId: Long): Long
 }

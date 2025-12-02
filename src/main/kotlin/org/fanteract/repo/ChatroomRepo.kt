@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository
 interface ChatroomRepo: JpaRepository<Chatroom, Long> {
     fun findByUserId(userId: Long): List<Chatroom>
     fun findByUserIdAndTitleContaining(userId: Long, title: String): List<Chatroom>
+    fun countByUserId(userId: Long): Long
 }

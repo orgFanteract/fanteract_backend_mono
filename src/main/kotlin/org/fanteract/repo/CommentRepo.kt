@@ -31,4 +31,11 @@ interface CommentRepo: JpaRepository<Comment, Long> {
     fun findByBoardIdIn(
         @Param("idList") idList: List<Long>
     ): List<Comment>
+    @Query("""
+        SELECT COUNT(c)
+        FROM Comment c
+        WHERE c.userId = :userId
+          AND c.status = 'ACTIVATED'
+    """)
+    fun countByUserId(@Param("userId") userId: Long): Long
 }

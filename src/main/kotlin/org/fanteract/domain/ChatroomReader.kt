@@ -36,4 +36,8 @@ class ChatroomReader(
         return chatroomRepo.findByUserIdAndTitleContaining(userId, title)
     }
 
+    fun countByUserId(userId: Long): Long {
+        return chatroomRepo.countByUserId(userId)
+    }
+
 }
