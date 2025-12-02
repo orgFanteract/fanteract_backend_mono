@@ -1,5 +1,6 @@
 package org.fanteract.service
 
+import jakarta.persistence.Column
 import org.fanteract.domain.BoardHeartReader
 import org.fanteract.domain.BoardHeartWriter
 import org.fanteract.domain.BoardReader
@@ -7,6 +8,7 @@ import org.fanteract.domain.BoardWriter
 import org.fanteract.domain.CommentReader
 import org.fanteract.domain.CommentWriter
 import org.fanteract.domain.UserReader
+import org.fanteract.domain.UserWriter
 import org.fanteract.dto.CreateBoardRequest
 import org.fanteract.dto.CreateBoardResponse
 import org.fanteract.dto.CreateHeartInBoardResponse
@@ -17,7 +19,9 @@ import org.fanteract.dto.UpdateBoardRequest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import kotlin.Long
+import kotlin.String
 
 @Service
 class BoardService(
@@ -27,6 +31,7 @@ class BoardService(
     private val boardHeartReader: BoardHeartReader,
     private val boardHeartWriter: BoardHeartWriter,
     private val userReader: UserReader,
+    private val userWriter: UserWriter,
 ) {
     fun createBoard(
         createBoardRequest: CreateBoardRequest,
@@ -38,6 +43,12 @@ class BoardService(
                 content = createBoardRequest.content,
                 userId = userId,
             )
+
+        // 활동 점수 변경
+        userWriter.updateActivePoint(
+            userId = userId,
+            activePoint = 10
+        )
 
         return CreateBoardResponse(board.boardId)
     }
@@ -202,6 +213,12 @@ class BoardService(
                 userId = userId,
                 boardId = boardId,
             )
+
+        // 활동 점수 변경
+        userWriter.updateActivePoint(
+            userId = userId,
+            activePoint = 1
+        )
 
         return CreateHeartInBoardResponse(response.boardHeartId)
     }

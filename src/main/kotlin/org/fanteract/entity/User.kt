@@ -15,10 +15,12 @@ class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val userId: Long = 0L,
-    @Column(unique = true) val email: String,
+    @Column(unique = true)
+    val email: String,
     val password: String,
     val name: String,
     val balance: Int = 0,
-    val activePoint: Int = 0,
+    var activePoint: Int = 0,
+    var abusePoint: Int = 0,
     val passExpiredAt: LocalDateTime? = null,
 ): BaseEntity()
