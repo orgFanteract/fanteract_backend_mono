@@ -23,4 +23,14 @@ class UserWriter(
             )
         )
     }
+
+    fun updateActivePoint(
+        userId: Long,
+        activePoint: Int
+    ) {
+        val user = userRepo.findById(userId).orElseThrow{NoSuchElementException("조건에 맞는 사용자가 존재하지 않습니다")}
+        user.activePoint += activePoint
+
+        userRepo.save(user)
+    }
 }

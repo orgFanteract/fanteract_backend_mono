@@ -8,6 +8,7 @@ import org.fanteract.domain.UserChatroomHistoryWriter
 import org.fanteract.domain.UserChatroomReader
 import org.fanteract.domain.UserChatroomWriter
 import org.fanteract.domain.UserReader
+import org.fanteract.domain.UserWriter
 import org.fanteract.dto.CreateChatroomRequest
 import org.fanteract.dto.CreateChatroomResponse
 import org.fanteract.dto.JoinChatroomResponse
@@ -40,6 +41,7 @@ class ChatService(
     private val chatWriter: ChatWriter,
     private val chatReader: ChatReader,
     private val userReader: UserReader,
+    private val userWriter: UserWriter,
 ) {
     fun createChatroom(
         userId: Long,
@@ -75,19 +77,6 @@ class ChatService(
         )
     }
     fun readChatroomSummaryById(
-        userId: Long,
-        chatroomId: Long,
-    ): ReadChatroomResponse {
-        val chatroom = chatroomReader.findByChatroomIdAndUserId(chatroomId, userId)
-
-        return ReadChatroomResponse(
-            chatroomId = chatroom.chatroomId,
-            title = chatroom.title,
-            description = chatroom.description,
-        )
-    }
-
-    fun readChatroomDetailById(
         userId: Long,
         chatroomId: Long,
     ): ReadChatroomResponse {
@@ -163,6 +152,12 @@ class ChatService(
             )
 
         val user = userReader.findById(chat.userId)
+
+        // 활동 점수 변경
+        userWriter.updateActivePoint(
+            userId = userId,
+            activePoint = 1
+        )
 
         return SendChatResponseDto(
             userName = user.name,

@@ -5,6 +5,7 @@ import org.fanteract.domain.CommentHeartWriter
 import org.fanteract.domain.CommentReader
 import org.fanteract.domain.CommentWriter
 import org.fanteract.domain.UserReader
+import org.fanteract.domain.UserWriter
 import org.fanteract.dto.*
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -19,6 +20,7 @@ class CommentService(
     private val commentHeartReader: CommentHeartReader,
     private val commentHeartWriter: CommentHeartWriter,
     private val userReader: UserReader,
+    private val userWriter: UserWriter,
 ) {
     fun readCommentsByBoardId(
         boardId: Long,
@@ -112,6 +114,12 @@ class CommentService(
                 content = createCommentRequest.content,
             )
 
+        // 활동 점수 변경
+        userWriter.updateActivePoint(
+            userId = userId,
+            activePoint = 3
+        )
+
         return CreateCommentResponse(commentId = comment.commentId)
     }
     fun updateComment(commentId: Long, userId: Long, updateCommentRequest: UpdateCommentRequest) {
@@ -150,6 +158,12 @@ class CommentService(
                 userId = userId,
                 commentId = commentId,
             )
+
+        // 활동 점수 변경
+        userWriter.updateActivePoint(
+            userId = userId,
+            activePoint = 1
+        )
 
         return CreateHeartInCommentResponse(response.commentHeartId)
     }
