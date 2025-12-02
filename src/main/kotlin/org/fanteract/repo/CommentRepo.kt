@@ -16,6 +16,11 @@ interface CommentRepo: JpaRepository<Comment, Long> {
         pageable: Pageable
     ): Page<Comment>
 
+    @Query("SELECT c FROM Comment c WHERE c.boardId = :boardId AND c.status = 'ACTIVATED'")
+    fun findByBoardId(
+        @Param("boardId") boardId: Long,
+    ): List<Comment>
+
     @Query("SELECT c FROM Comment c WHERE c.userId = :userId AND c.status = 'ACTIVATED'")
     fun findByUserId(
         @Param("userId") userId: Long,

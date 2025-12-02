@@ -1,5 +1,7 @@
 package org.fanteract.service
 
+import org.fanteract.domain.AlarmWriter
+import org.fanteract.domain.BoardReader
 import org.fanteract.domain.CommentHeartReader
 import org.fanteract.domain.CommentHeartWriter
 import org.fanteract.domain.CommentReader
@@ -7,8 +9,11 @@ import org.fanteract.domain.CommentWriter
 import org.fanteract.domain.UserReader
 import org.fanteract.domain.UserWriter
 import org.fanteract.dto.*
+import org.fanteract.entity.CommentHeart
 import org.fanteract.enumerate.ActivePoint
+import org.fanteract.enumerate.AlarmStatus
 import org.fanteract.enumerate.Balance
+import org.fanteract.enumerate.ContentType
 import org.fanteract.enumerate.FilterAction
 import org.fanteract.filter.ProfanityFilterService
 import org.springframework.data.domain.PageRequest
@@ -25,6 +30,8 @@ class CommentService(
     private val commentHeartWriter: CommentHeartWriter,
     private val userReader: UserReader,
     private val userWriter: UserWriter,
+    private val alarmWriter: AlarmWriter,
+    private val boardReader: BoardReader,
     private val profanityFilterService: ProfanityFilterService,
 ) {
     fun readCommentsByBoardId(
@@ -152,6 +159,30 @@ class CommentService(
             activePoint = ActivePoint.COMMENT.point
         )
 
+        // 코멘트 및 게시글 생성자 전체에게 알림 전송
+        val commentUserList = commentReader.findByBoardId(boardId).map{it.userId}.distinct()
+
+        for (commentUserId in commentUserList){
+            alarmWriter.create(
+                userId = userId,
+                targetUserId = commentUserId,
+                contentType = ContentType.COMMENT,
+                contentId = comment.commentId,
+                alarmStatus = AlarmStatus.CREATED,
+            )
+        }
+
+        val boardUserId = boardReader.readById(boardId).userId
+
+        alarmWriter.create(
+            userId = userId,
+            targetUserId = boardUserId,
+            contentType = ContentType.COMMENT,
+            contentId = boardId,
+            alarmStatus = AlarmStatus.CREATED,
+        )
+
+        // 반환
         return CreateCommentResponse(
             commentId = comment.commentId,
             isFiltered = false
@@ -198,7 +229,7 @@ class CommentService(
             throw NoSuchElementException("조건에 맞는 코멘트가 존재하지 않습니다")
         }
 
-        val response =
+        val commentHeart =
             commentHeartWriter.create(
                 userId = userId,
                 commentId = commentId,
@@ -210,7 +241,18 @@ class CommentService(
             activePoint = ActivePoint.HEART.point
         )
 
-        return CreateHeartInCommentResponse(response.commentHeartId)
+        // 알림 전송
+        val comment = commentReader.readById(commentId)
+
+        alarmWriter.create(
+            userId = userId,
+            targetUserId = comment.userId,
+            contentType = ContentType.COMMENT_HEART,
+            contentId = commentHeart.commentHeartId,
+            alarmStatus = AlarmStatus.CREATED,
+        )
+
+        return CreateHeartInCommentResponse(commentHeart.commentHeartId)
     }
 
     fun deleteHeartInComment(commentId: Long, userId: Long) {

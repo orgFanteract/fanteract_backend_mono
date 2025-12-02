@@ -1,5 +1,6 @@
 package org.fanteract.service
 
+import org.fanteract.domain.AlarmWriter
 import org.fanteract.domain.BoardHeartReader
 import org.fanteract.domain.BoardHeartWriter
 import org.fanteract.domain.BoardReader
@@ -15,7 +16,9 @@ import org.fanteract.dto.ReadBoardListResponse
 import org.fanteract.dto.ReadBoardResponse
 import org.fanteract.dto.UpdateBoardRequest
 import org.fanteract.enumerate.ActivePoint
+import org.fanteract.enumerate.AlarmStatus
 import org.fanteract.enumerate.Balance
+import org.fanteract.enumerate.ContentType
 import org.fanteract.enumerate.FilterAction
 import org.fanteract.filter.ProfanityFilterService
 import org.springframework.data.domain.PageRequest
@@ -34,6 +37,7 @@ class BoardService(
     private val boardHeartWriter: BoardHeartWriter,
     private val userReader: UserReader,
     private val userWriter: UserWriter,
+    private val alarmWriter: AlarmWriter,
     private val profanityFilterService: ProfanityFilterService,
 ) {
     fun createBoard(
@@ -248,7 +252,7 @@ class BoardService(
             throw NoSuchElementException("조건에 맞는 게시글이 존재하지 않습니다")
         }
 
-        val response =
+        val boardHeart =
             boardHeartWriter.create(
                 userId = userId,
                 boardId = boardId,
@@ -260,7 +264,18 @@ class BoardService(
             activePoint = ActivePoint.HEART.point
         )
 
-        return CreateHeartInBoardResponse(response.boardHeartId)
+        val board = boardReader.readById(boardHeart.boardId)
+
+        // 알림 전송
+        alarmWriter.create(
+            userId = userId,
+            targetUserId = board.userId,
+            contentType = ContentType.BOARD_HEART,
+            contentId = boardHeart.boardHeartId,
+            alarmStatus = AlarmStatus.CREATED,
+        )
+
+        return CreateHeartInBoardResponse(boardHeart.boardHeartId)
     }
 
     fun deleteHeartInBoard(boardId: Long, userId: Long) {
