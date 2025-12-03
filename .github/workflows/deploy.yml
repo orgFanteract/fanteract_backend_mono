@@ -1,18 +1,15 @@
 name: CI/CD - fanteract (gitflow)
 
 on:
-  push:
-    branches:
-      - develop
-      - 'feat/**'
-
   pull_request:
     branches:
       - develop
+    types:
+      - closed
 
 jobs:
-  # 1) 공통 빌드/테스트
   build-and-test:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
@@ -38,17 +35,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # ✅ test 프로필로 H2 기반 테스트 실행
       - name: Run tests with test profile
         run: ./gradlew test -Dspring.profiles.active=test
 
-  # 2) develop 에 머지되었을 때만 EC2에 배포
   deploy-to-dev:
     needs: build-and-test
     runs-on: ubuntu-latest
 
-    # ✅ develop 브랜치에 커밋이 생겼을 때만 실행
-    if: github.ref == 'refs/heads/develop'
+    if: github.event.pull_request.merged == true
 
     steps:
       - name: Deploy to EC2 via SSH
