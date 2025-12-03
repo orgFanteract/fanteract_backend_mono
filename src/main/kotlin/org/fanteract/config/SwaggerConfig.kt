@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration
 @OpenAPIDefinition(
     servers = [
         Server(url = "http://localhost:8080", description = "로컬 서버"),
+        Server(url = "http://fanteract-alb-783000774.ap-northeast-2.elb.amazonaws.com", description = "외부 서버")
     ]
 )
 @Configuration

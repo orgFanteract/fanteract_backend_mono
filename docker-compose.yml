@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  app:
+    image: fanteract-app:latest
+    container_name: fanteract-app
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8080
+      SPRING_APPLICATION_NAME: fanteract
+
+      # ✅ RDS 연결 정보
+      SPRING_DATASOURCE_URL: jdbc:mysql://fanteract-db.c32w6yq24ria.ap-northeast-2.rds.amazonaws.com:3306/fanteract_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+
+      # JPA 설정
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update     # 필요에 따라 validate/none 로 바꿔도 됨
+      SPRING_JPA_SHOW_SQL: "true"
+
+      # JWT
+      JWT_SECRET: jwtsecretas78dg97d89we4hahsd89we4hahsd89eqwhu4rtihweur489wtbakjwerbjka2q9it4
+
+    ports:
+      - "8080:8080"
+    restart: always
