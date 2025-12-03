@@ -6,7 +6,7 @@ services:
     container_name: fanteract-mysql
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: fanteract-db
+      MYSQL_DATABASE: fanteract_db
     ports:
       - "3406:3306"
     command:
@@ -25,7 +25,7 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       SERVER_PORT: 8080
       SPRING_APPLICATION_NAME: fanteract
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/fanteract-db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/fanteract_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
