@@ -45,6 +45,9 @@ dependencies {
 
     // log
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
+
+    // h2 db for test
+    testImplementation("com.h2database:h2")
 }
 
 kotlin {

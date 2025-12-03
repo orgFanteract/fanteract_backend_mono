@@ -28,7 +28,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # (선택) Gradle 캐시 – 빌드 속도 개선용
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
@@ -39,8 +38,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Run tests
-        run: ./gradlew test
+      # ✅ test 프로필로 H2 기반 테스트 실행
+      - name: Run tests with test profile
+        run: ./gradlew test -Dspring.profiles.active=test
 
   # 2) develop 에 머지되었을 때만 EC2에 배포
   deploy-to-dev:
