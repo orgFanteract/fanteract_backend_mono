@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration
 @OpenAPIDefinition(
     servers = [
         Server(url = "http://localhost:8080", description = "로컬 서버"),
+        Server(url = "http://3.38.43.146:8080", description = "외부 서버")
     ]
 )
 @Configuration
